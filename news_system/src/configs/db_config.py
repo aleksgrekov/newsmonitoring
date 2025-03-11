@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import Optional
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from base_config import Settings
 
 
-class DBSettings(BaseSettings):
+class DBSettings(Settings):
     """
     Класс для управления настройками подключения к базе данных Postgres.
 
@@ -32,12 +31,6 @@ class DBSettings(BaseSettings):
             port=self.DB_PORT,
             name=self.POSTGRES_DB,
         )
-
-    model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parent.parent.parent.parent
-        / ".env",  # Путь к файлу .env
-        extra="ignore",  # Игнорировать лишние переменные окружения
-    )
 
 
 # Создание глобального экземпляра настроек базы данных
