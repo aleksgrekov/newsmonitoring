@@ -12,7 +12,6 @@ class News(Base):
     title: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     pub_date: Mapped[Optional[datetime]]
-    source: Mapped[str] = mapped_column(String(100), default="CNN")
     url: Mapped[str] = mapped_column(String(255), unique=True)
 
     def __repr__(self):
@@ -20,8 +19,8 @@ class News(Base):
             f"<News("
             f"id={self.id!r}, "
             f"title={self.title!r}, "
+            f"content={self.content[:10]!r}..., "
             f"pub_date={self.pub_date!r}, "
-            f"source={self.source!r}, "
             f"url={self.url!r}"
             f")>"
         )

@@ -46,13 +46,11 @@ class ArticleParser:
                     pub_date = None
                     if raw_date:
                         try:
-                            pub_date = date_parser.parse(
-                                raw_date, ignoretz=True
-                            ).isoformat()
+                            pub_date = date_parser.parse(raw_date, ignoretz=True)
                         except ValueError as e:
                             logger.error(f"Ошибка при парсинге даты: {e}")
 
-                    return {"full_text": full_text, "pub_date": pub_date}
+                    return {"content": full_text, "pub_date": pub_date}
         except Exception as e:
             logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
             return {"full_text": "", "pub_date": None}
