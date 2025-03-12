@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, List
 
 from src.configs.parser_config import parser_settings
@@ -14,18 +15,23 @@ class CNNParser:
         self.__http_requester = HttpRequester()
         self.__article_parser = ArticleParser()
 
-    def collect_news(self) -> List[Dict[str, str]]:
-        logger.info(f"Парсинг страницы: {self.__url}")
-        modified_header = self.__http_requester.fetch_and_compare()
-        html_content = self.__http_requester.send_request(modified_header)
-        if html_content is None:
+    async def collect_news(self) -> List[Dict[str, str]]:
+        try:
+            logger.info(f"Парсинг страницы: {self.__url}")
+            modified_header = await self.__http_requester.fetch_and_compare()
+            html_content = await self.__http_requester.send_request(modified_header)
+            if html_content is None:
+                return []
+
+            news_list = await self.__article_parser.parse_page(html_content)
+            return news_list
+        except Exception as e:
+            logger.error(f"Ошибка при сборе новостей: {e}")
             return []
 
-        news_list = self.__article_parser.parse_page(html_content)
 
-        return news_list
-
-
-x = CNNParser()
-for n in x.collect_news():
-    print(n)
+if __name__ == "__main__":
+    cnn_parser = CNNParser()
+    news_list_x = asyncio.run(cnn_parser.collect_news())
+    for n in news_list_x:
+        print(n)

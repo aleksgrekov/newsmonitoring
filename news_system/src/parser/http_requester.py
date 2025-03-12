@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-import requests
+import aiohttp
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
 
@@ -41,34 +41,42 @@ class HttpRequester:
         except OSError as e:
             logger.error(f"Ошибка при сохранении last_modified: {e}")
 
-    def fetch_and_compare(self) -> Optional[str]:
-        head_response = requests.head(self.__url)
-        if head_response.status_code != 200:
-            logger.error(f"Не удалось получить заголовки для {self.__url}")
-            return None
+    async def fetch_and_compare(self) -> Optional[str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.head(self.__url, timeout=45) as response:
+                if response.status != 200:
+                    logger.error(f"Не удалось получить заголовки для {self.__url}")
+                    return None
 
-        last_modified_header = head_response.headers.get("x-last-modified")
-        logger.info(f"Last-Modified: {last_modified_header}")
+                last_modified_header = response.headers.get("x-last-modified")
+                if not last_modified_header:
+                    logger.warning("Заголовок 'x-last-modified' отсутствует.")
+                    return None
+                logger.info(f"Last-Modified: {last_modified_header}")
 
-        if last_modified_header == self.last_modified:
-            logger.info("Контент не изменился. Используем сохраненный файл.")
-            return None
+                if last_modified_header == self.last_modified:
+                    logger.info("Контент не изменился. Используем сохраненный файл.")
+                    return None
 
-        return last_modified_header
+                return last_modified_header
 
-    def send_request(self, modified_header: Optional[str]) -> Optional[bytes]:
+    async def send_request(self, modified_header: Optional[str]) -> Optional[bytes]:
         if not modified_header:
             logger.error("Не передан модификатор заголовка или контент не изменился!")
             return None
 
         try:
-            response = requests.get(self.__url, headers=self.__headers, timeout=10)
-            if response.status_code == 200:
-                self.__save_last_modified(modified_header)
-                return response.content
-            else:
-                logger.error(f"Ошибка при запросе: {response.status_code}")
-                return None
-        except requests.exceptions.RequestException as e:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    self.__url, headers=self.__headers, timeout=30
+                ) as response:
+                    if response.status == 200:
+                        content = await response.read()
+                        self.__save_last_modified(modified_header)
+                        return content
+                    else:
+                        logger.error(f"Ошибка при запросе: {response.status}")
+                        return None
+        except Exception as e:
             logger.error(f"Ошибка при отправке запроса: {e}")
             return None
