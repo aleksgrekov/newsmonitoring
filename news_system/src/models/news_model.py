@@ -1,8 +1,8 @@
 from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import String, Text, func
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
-
 from src.models.base_model import Base
 
 
@@ -11,10 +11,8 @@ class News(Base):
 
     title: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
-    pub_date: Mapped[datetime] = mapped_column(
-        server_default=func.now(), default=datetime.now
-    )
-    source: Mapped[str] = mapped_column(String(100))
+    pub_date: Mapped[Optional[datetime]]
+    source: Mapped[str] = mapped_column(String(100), default="CNN")
     url: Mapped[str] = mapped_column(String(255), unique=True)
 
     def __repr__(self):

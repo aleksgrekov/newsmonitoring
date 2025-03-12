@@ -1,4 +1,4 @@
-from base_config import Settings
+from src.configs.base_config import Settings
 
 
 class ParserSettings(Settings):
