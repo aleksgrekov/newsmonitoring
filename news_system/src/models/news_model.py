@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Text
+from sqlalchemy import String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base_model import Base
@@ -9,11 +9,11 @@ from src.models.base_model import Base
 
 class News(Base):
     __tablename__ = "news"
-
+    __table_args__ = (UniqueConstraint("pub_date", "url", name="pub_date_url_const"),)
     title: Mapped[str] = mapped_column(String(255))
     content: Mapped[Optional[str]] = mapped_column(Text)
     pub_date: Mapped[Optional[datetime]]
-    url: Mapped[str] = mapped_column(String(255), unique=True)
+    url: Mapped[str] = mapped_column(String(255))
 
     def __repr__(self):
         return (

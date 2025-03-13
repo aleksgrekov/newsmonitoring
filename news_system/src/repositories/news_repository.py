@@ -20,11 +20,11 @@ class NewsRepository:
             return
 
         stmt = insert(News).values([dict(data) for data in news])
-        stmt = stmt.on_conflict_do_update(
-            index_elements=["url"],
-            set_={"content": stmt.excluded.content, "pub_date": stmt.excluded.pub_date},
-        )
-        # stmt = stmt.on_conflict_do_nothing()
+        # stmt = stmt.on_conflict_do_update(
+        #     index_elements=["url"],
+        #     set_={"content": stmt.excluded.content, "pub_date": stmt.excluded.pub_date},
+        # )
+        stmt = stmt.on_conflict_do_nothing()
         await session.execute(stmt)
         await cls._secure_commit(session)
         logger.info("В базу добавлено {} новостей!".format(len(news)))

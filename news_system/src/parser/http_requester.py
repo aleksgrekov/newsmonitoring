@@ -19,21 +19,21 @@ class HttpRequester(IHttpRequester):
         self.last_modified = None
         self.__load_last_modified()
 
-    async def fetch_and_compare(self, client: "ClientSession") -> str:
-        async with client.head(self.__url, timeout=ClientTimeout(45)) as response:
+    async def fetch_and_compare(self, client: "ClientSession") -> Optional[str]:
+        async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
             if response.status != 200:
                 logger.error(f"Не удалось получить заголовки для {self.__url}")
-                return "forced-request"
+                return None
 
             last_modified_header = response.headers.get("x-last-modified")
             if not last_modified_header:
                 logger.warning("Заголовок 'x-last-modified' отсутствует.")
-                return "forced-request"
+                return None
             logger.info(f"Last-Modified: {last_modified_header}")
 
             if last_modified_header == self.last_modified:
                 logger.info("Контент не изменился. Используем сохраненный файл.")
-                return "forced-request"
+                return None
 
             return last_modified_header
 
@@ -46,7 +46,7 @@ class HttpRequester(IHttpRequester):
 
         try:
             async with client.get(
-                self.__url, headers=self.__get_headers(), timeout=ClientTimeout(30)
+                self.__url, headers=self.__get_headers(), timeout=ClientTimeout(15)
             ) as response:
                 if response.status == 200:
                     content = await response.read()

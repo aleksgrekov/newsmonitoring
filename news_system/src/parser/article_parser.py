@@ -12,9 +12,7 @@ from src.logger.logger_config import configure_logging
 from src.parser.interfaces import IArticleParser
 
 logger = configure_logging(__name__)
-semaphore = Semaphore(1)
-
-MAX_RETRIES = 5  # Добавим ограничение
+async_semaphore = Semaphore(30)
 
 
 class ArticleParser(IArticleParser):
@@ -27,7 +25,7 @@ class ArticleParser(IArticleParser):
             containers = soup.select("div.card.container__item")
 
             tasks = [
-                self.__parse_cnn_container(container, client)
+                self.__parse_cnn_container(async_semaphore, container, client)
                 for container in containers
                 if container
             ]
@@ -46,6 +44,7 @@ class ArticleParser(IArticleParser):
 
     async def __parse_cnn_container(
         self,
+        semaphore: "Semaphore",
         container,
         client: "ClientSession",
     ) -> Dict[str, str]:
@@ -68,56 +67,46 @@ class ArticleParser(IArticleParser):
     async def __parse_article_page(
         self, client: "ClientSession", url: str
     ) -> Dict[str, str]:
-        async with semaphore:
-            attempts = 0
-            wait_time = 1
-            while True:
-                try:
-                    async with client.get(
-                        url, headers=self.__get_headers(), timeout=ClientTimeout(60)
-                    ) as response:
-                        if response.status == 429:
-                            if attempts == MAX_RETRIES - 1:
-                                logger.warning(
-                                    f"Превышено количество попыток парсинга {url}"
-                                )
-                                return {"content": "", "pub_date": None}
-                            logger.info(
-                                f"Получен код 429. Ожидание {wait_time} секунд перед повторным запросом..."
-                            )
-                            await asyncio.sleep(wait_time)
-                            wait_time = min(wait_time * 2, 60)
-                            attempts += 1
-                            continue
-                        logger.info(f"{response.status}:attempt-{attempts} - {url}")
-                        html_content = await response.text()
-                        soup = BeautifulSoup(html_content, "lxml")
-
-                        content_container = soup.find("div", class_="article__content")
-                        paragraphs = (
-                            content_container.find_all("p") if content_container else []
+        wait_time = 1
+        while True:
+            try:
+                async with client.get(
+                    url, headers=self.__get_headers(), timeout=ClientTimeout(60)
+                ) as response:
+                    if response.status == 429:
+                        logger.info(
+                            f"Получен код 429. Ожидание {wait_time} секунд перед повторным запросом..."
                         )
-                        full_text = " ".join(p.text.strip() for p in paragraphs)
+                        await asyncio.sleep(wait_time)
+                        wait_time = min(wait_time * 2, 60)
+                        continue
+                    logger.info(f"{response.status} - {url}")
+                    html_content = await response.text()
+                    soup = BeautifulSoup(html_content, "lxml")
 
-                        date_tag = soup.find("div", class_="timestamp vossi-timestamp")
-                        raw_date = date_tag.text.strip() if date_tag else ""
-                        raw_date = (
-                            raw_date.replace("Updated", "")
-                            .replace("Published", "")
-                            .strip()
-                        )
+                    content_container = soup.find("div", class_="article__content")
+                    paragraphs = (
+                        content_container.find_all("p") if content_container else []
+                    )
+                    full_text = " ".join(p.text.strip() for p in paragraphs)
 
-                        pub_date = None
-                        if raw_date:
-                            try:
-                                pub_date = date_parser.parse(raw_date, ignoretz=True)
-                            except ValueError as e:
-                                logger.error(f"Ошибка при парсинге даты: {e}")
+                    date_tag = soup.find("div", class_="timestamp vossi-timestamp")
+                    raw_date = date_tag.text.strip() if date_tag else ""
+                    raw_date = (
+                        raw_date.replace("Updated", "").replace("Published", "").strip()
+                    )
 
-                        return {"content": full_text, "pub_date": pub_date}
-                except ClientResponseError as e:
-                    logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
-                    return {"full_text": "", "pub_date": None}
+                    pub_date = None
+                    if raw_date:
+                        try:
+                            pub_date = date_parser.parse(raw_date, ignoretz=True)
+                        except ValueError as e:
+                            logger.error(f"Ошибка при парсинге даты: {e}")
+
+                    return {"content": full_text, "pub_date": pub_date}
+            except ClientResponseError as e:
+                logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
+                return {"full_text": "", "pub_date": None}
 
     @staticmethod
     def __get_user_agent():
