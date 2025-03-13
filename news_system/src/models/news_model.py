@@ -3,6 +3,7 @@ from typing import Optional
 
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.models.base_model import Base
 
 

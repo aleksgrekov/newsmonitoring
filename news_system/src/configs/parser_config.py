@@ -4,8 +4,9 @@ from src.configs.base_config import Settings
 class ParserSettings(Settings):
 
     NEWS_URL: str
-    YOUR_ACCEPT_HEADER: str
-    YOUR_USER_AGENT_HEADER: str
+    ACCEPT: str
+    ACCEPT_LANGUAGE: str
+    CONNECTION: str
 
 
 # Создание глобального экземпляра настроек базы данных

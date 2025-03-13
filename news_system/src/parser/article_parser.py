@@ -1,33 +1,56 @@
 import asyncio
 from typing import Dict, List
 
-import aiohttp
+from aiohttp import ClientResponseError, ClientSession
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
+from fake_useragent import UserAgent
+
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
+from src.parser.interfaces import IArticleParser
 
 logger = configure_logging(__name__)
 
 
-class ArticleParser:
-    def __init__(self):
-        self.__headers = self.__create_headers
+class ArticleParser(IArticleParser):
 
-    @property
-    def __create_headers(self):
-        return {
-            "Accept": parser_settings.YOUR_ACCEPT_HEADER,
-            "User-Agent": parser_settings.YOUR_USER_AGENT_HEADER,
-        }
-
-    async def parse_article_page(self, url: str) -> Dict[str, str]:
+    async def parse_page(
+        self, client: "ClientSession", html_content: bytes
+    ) -> List[Dict[str, str]]:
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url, headers=self.__headers, timeout=45
+            soup = BeautifulSoup(html_content, "lxml")
+            containers = soup.select("div.card.container__item")
+
+            tasks = [
+                self.__parse_cnn_container(container, client)
+                for container in containers
+                if container
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            return [result for result in results if isinstance(result, dict)]
+        except Exception as e:
+            logger.error(f"Ошибка при парсинге страницы: {e}")
+            return []
+
+    async def __parse_article_page(
+        self, client: "ClientSession", url: str
+    ) -> Dict[str, str]:
+        wait_time = 1
+        while True:
+            try:
+                async with client.get(
+                    url, headers=self.__get_headers(), timeout=45
                 ) as response:
-                    response.raise_for_status()
+                    if response.status == 429:
+                        logger.info(
+                            f"Получен код 429. Ожидание {wait_time} секунд перед повторным запросом..."
+                        )
+                        await asyncio.sleep(wait_time)
+                        wait_time = min(wait_time * 2, 60)
+                        continue
+
                     html_content = await response.text()
                     soup = BeautifulSoup(html_content, "lxml")
 
@@ -51,55 +74,28 @@ class ArticleParser:
                             logger.error(f"Ошибка при парсинге даты: {e}")
 
                     return {"content": full_text, "pub_date": pub_date}
-        except Exception as e:
-            logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
-            return {"full_text": "", "pub_date": None}
+            except ClientResponseError as e:
+                logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
+                return {"full_text": "", "pub_date": None}
 
-    async def parse_page(self, html_content: bytes) -> List[Dict[str, str]]:
-        try:
-            soup = BeautifulSoup(html_content, "lxml")
-            containers = soup.select("div.card.container__item")
+    @property
+    def __get_user_agent(self):
+        user_agent = UserAgent().random
+        return user_agent
 
-            tasks = [
-                self.__parse_cnn_container(container)
-                for container in containers
-                if container
-            ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+    def __get_headers(self):
+        return {
+            "Accept": parser_settings.ACCEPT,
+            "User-Agent": self.__get_user_agent,
+            "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
+            "Connection": parser_settings.CONNECTION,
+        }
 
-            print(len(results))
-            return [result for result in results if isinstance(result, dict)]
-        except Exception as e:
-            logger.error(f"Ошибка при парсинге страницы: {e}")
-            return []
-
-    # async def parse_page(self, html_content: bytes) -> List[Dict[str, str]]:
-    #     try:
-    #         soup = BeautifulSoup(html_content, "lxml")
-    #         containers = soup.select("div.card.container__item")
-    #         with ThreadPoolExecutor() as executor:
-    #             # Параллельная обработка всех контейнеров
-    #             futures = [
-    #                 executor.submit(await self.__parse_cnn_container, container)
-    #                 for container in containers
-    #                 if container
-    #             ]
-    #             results = []
-    #             for future in as_completed(futures):
-    #                 result = future.result()
-    #                 if result:
-    #                     results.append(result)
-    #             return results
-    # return [
-    #     self.__parse_cnn_container(container)
-    #     for container in containers
-    #     if container
-    # ]
-    # except Exception as e:
-    #     logger.error(f"Ошибка при парсинге страницы: {e}")
-    #     return []
-
-    async def __parse_cnn_container(self, container) -> Dict[str, str]:
+    async def __parse_cnn_container(
+        self,
+        container,
+        client: "ClientSession",
+    ) -> Dict[str, str]:
         try:
             headline_tag = container.find("span", class_="container__headline-text")
             title = headline_tag.text.strip() if headline_tag else "No title"
@@ -109,7 +105,7 @@ class ArticleParser:
             if not link.startswith("http"):
                 link = f"https://www.cnn.com{link}"
 
-            article_data = await self.parse_article_page(link)
+            article_data = await self.__parse_article_page(client, link)
             return {"title": title, "url": link, **article_data}
         except Exception as e:
             logger.error(f"Ошибка при парсинге контейнера: {e}")
