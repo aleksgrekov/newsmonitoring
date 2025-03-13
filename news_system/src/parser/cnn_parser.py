@@ -19,7 +19,9 @@ class CNNParser(INewsParser):
 
     async def collect_news(self) -> List[Dict[str, str]]:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(
+                timeout=aiohttp.ClientTimeout(300)
+            ) as session:
                 logger.info(f"Парсинг страницы: {self.__url} - Начало задачи...")
                 modified_header = await self.__http_requester.fetch_and_compare(session)
                 html_content = await self.__http_requester.send_request(

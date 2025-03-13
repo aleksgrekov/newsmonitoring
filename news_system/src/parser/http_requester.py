@@ -19,21 +19,21 @@ class HttpRequester(IHttpRequester):
         self.last_modified = None
         self.__load_last_modified()
 
-    async def fetch_and_compare(self, client: "ClientSession") -> Optional[str]:
+    async def fetch_and_compare(self, client: "ClientSession") -> str:
         async with client.head(self.__url, timeout=ClientTimeout(45)) as response:
             if response.status != 200:
                 logger.error(f"Не удалось получить заголовки для {self.__url}")
-                return None
+                return "forced-request"
 
             last_modified_header = response.headers.get("x-last-modified")
             if not last_modified_header:
                 logger.warning("Заголовок 'x-last-modified' отсутствует.")
-                return None
+                return "forced-request"
             logger.info(f"Last-Modified: {last_modified_header}")
 
             if last_modified_header == self.last_modified:
                 logger.info("Контент не изменился. Используем сохраненный файл.")
-                return None
+                return "forced-request"
 
             return last_modified_header
 
@@ -59,15 +59,15 @@ class HttpRequester(IHttpRequester):
             logger.error(f"Ошибка при отправке запроса: {e}")
             return None
 
-    @property
-    def __get_user_agent(self):
+    @staticmethod
+    def __get_user_agent():
         user_agent = UserAgent().random
         return user_agent
 
     def __get_headers(self):
         return {
             "Accept": parser_settings.ACCEPT,
-            "User-Agent": self.__get_user_agent,
+            "User-Agent": self.__get_user_agent(),
             "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
             "Connection": parser_settings.CONNECTION,
         }

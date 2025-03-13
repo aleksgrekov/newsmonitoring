@@ -12,7 +12,9 @@ from src.logger.logger_config import configure_logging
 from src.parser.interfaces import IArticleParser
 
 logger = configure_logging(__name__)
-semaphore = Semaphore(10)
+semaphore = Semaphore(1)
+
+MAX_RETRIES = 5  # Добавим ограничение
 
 
 class ArticleParser(IArticleParser):
@@ -29,8 +31,10 @@ class ArticleParser(IArticleParser):
                 for container in containers
                 if container
             ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
+            results = await asyncio.gather(
+                *tasks,
+                return_exceptions=True,
+            )
             return [
                 result
                 for result in results
@@ -65,6 +69,7 @@ class ArticleParser(IArticleParser):
         self, client: "ClientSession", url: str
     ) -> Dict[str, str]:
         async with semaphore:
+            attempts = 0
             wait_time = 1
             while True:
                 try:
@@ -72,13 +77,19 @@ class ArticleParser(IArticleParser):
                         url, headers=self.__get_headers(), timeout=ClientTimeout(60)
                     ) as response:
                         if response.status == 429:
+                            if attempts == MAX_RETRIES - 1:
+                                logger.warning(
+                                    f"Превышено количество попыток парсинга {url}"
+                                )
+                                return {"content": "", "pub_date": None}
                             logger.info(
                                 f"Получен код 429. Ожидание {wait_time} секунд перед повторным запросом..."
                             )
                             await asyncio.sleep(wait_time)
                             wait_time = min(wait_time * 2, 60)
+                            attempts += 1
                             continue
-
+                        logger.info(f"{response.status}:attempt-{attempts} - {url}")
                         html_content = await response.text()
                         soup = BeautifulSoup(html_content, "lxml")
 
@@ -108,15 +119,15 @@ class ArticleParser(IArticleParser):
                     logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
                     return {"full_text": "", "pub_date": None}
 
-    @property
-    def __get_user_agent(self):
+    @staticmethod
+    def __get_user_agent():
         user_agent = UserAgent().random
         return user_agent
 
     def __get_headers(self):
         return {
             "Accept": parser_settings.ACCEPT,
-            "User-Agent": self.__get_user_agent,
+            "User-Agent": self.__get_user_agent(),
             "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
             "Connection": parser_settings.CONNECTION,
         }
