@@ -1,20 +1,16 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import TYPE_CHECKING
 
 from src.handlers.custom_exceptions import IntegrityViolationException
 from src.models.news_model import News
-
-if TYPE_CHECKING:
-    from src.parser.base_parser import BaseParser
+from src.parser.parser_factory import ParserFactory
 
 
 class NewsRepository:
 
     @classmethod
-    async def add_all_news_from_parser(
-        cls, parser: "BaseParser", session: AsyncSession
-    ):
+    async def add_all_news_from_parser(cls, session: AsyncSession):
+        parser = ParserFactory.create_cnn_parser()
         news = await parser.collect_news()
         if news:
             session.add_all([News(**data) for data in news])

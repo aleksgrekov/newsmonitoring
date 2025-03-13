@@ -11,7 +11,7 @@ class News(Base):
     __tablename__ = "news"
 
     title: Mapped[str] = mapped_column(String(255))
-    content: Mapped[str] = mapped_column(Text)
+    content: Mapped[Optional[str]] = mapped_column(Text)
     pub_date: Mapped[Optional[datetime]]
     url: Mapped[str] = mapped_column(String(255), unique=True)
 

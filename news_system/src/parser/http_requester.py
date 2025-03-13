@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from fake_useragent import UserAgent
 
 from src.configs.parser_config import parser_settings
@@ -20,7 +20,7 @@ class HttpRequester(IHttpRequester):
         self.__load_last_modified()
 
     async def fetch_and_compare(self, client: "ClientSession") -> Optional[str]:
-        async with client.head(self.__url, timeout=45) as response:
+        async with client.head(self.__url, timeout=ClientTimeout(45)) as response:
             if response.status != 200:
                 logger.error(f"Не удалось получить заголовки для {self.__url}")
                 return None
@@ -46,7 +46,7 @@ class HttpRequester(IHttpRequester):
 
         try:
             async with client.get(
-                self.__url, headers=self.__get_headers(), timeout=30
+                self.__url, headers=self.__get_headers(), timeout=ClientTimeout(30)
             ) as response:
                 if response.status == 200:
                     content = await response.read()
