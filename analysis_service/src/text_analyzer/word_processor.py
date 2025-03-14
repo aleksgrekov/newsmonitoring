@@ -6,6 +6,7 @@ from textblob import TextBlob
 
 # Загружаем стоп-слова и лемматизатор
 nltk.download("punkt")
+nltk.download("punkt_tab")
 nltk.download("stopwords")
 nltk.download("wordnet")
 

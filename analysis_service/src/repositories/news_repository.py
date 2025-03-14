@@ -22,7 +22,7 @@ class NewsRepository:
                 content = one_news.content
                 text = content if content else one_news.title
                 sentiment, keywords = analyze_text(text)
-                print(f"{sentiment=}\n\t\t{keywords=}")
+                print(f"id={one_news.id}\n\t{sentiment=}\n\t\t{keywords=}")
 
     @staticmethod
     async def _get_all_news(session: AsyncSession) -> Sequence["News"]:
