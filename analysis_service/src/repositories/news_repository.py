@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from analysis_service.src.database.service import session_factory
 from analysis_service.src.logger.logger_config import configure_logging
 from analysis_service.src.models.news_model import News
+from analysis_service.src.database.service import session_factory
 
 logger = configure_logging(__name__)
 
@@ -12,8 +12,11 @@ logger = configure_logging(__name__)
 class NewsRepository:
 
     @staticmethod
-    async def get_all_news() -> None:
+    async def text_analysis():
+        print("ok")
 
+    @staticmethod
+    async def _get_all_news() -> None:
         async with session_factory() as session:
             news_list = await session.execute(select(News))
             for news in news_list:

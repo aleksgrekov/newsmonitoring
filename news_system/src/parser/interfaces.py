@@ -3,6 +3,8 @@ from typing import Dict, List, Optional
 
 from aiohttp import ClientSession
 
+from news_system.src.schemas.news_schemas import NewsResponseSchema
+
 
 class IHttpRequester(ABC):
     @abstractmethod
@@ -35,5 +37,5 @@ class INewsParser(ABC):
         pass
 
     @abstractmethod
-    async def collect_news(self) -> List[Dict[str, str]]:
+    async def collect_news(self) -> NewsResponseSchema:
         pass
