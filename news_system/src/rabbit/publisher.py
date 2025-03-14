@@ -1,12 +1,9 @@
-import json
-from typing import Dict
-
 from aio_pika import Message
 
-from src.configs.rabbit_config import rabbit_config
-from src.rabbit.interfaces import IMessageSender, IConnection
-from src.rabbit.rabbit_connection import connection
-from src.logger.logger_config import configure_logging
+from news_system.src.configs.rabbit_config import rabbit_config
+from news_system.src.logger.logger_config import configure_logging
+from news_system.src.rabbit.interfaces import IConnection, IMessageSender
+from news_system.src.rabbit.rabbit_connection import connection
 
 logger = configure_logging(__name__)
 
@@ -15,26 +12,37 @@ class Publisher(IMessageSender):
 
     def __init__(self, conn: IConnection):
         self._connection = conn
-        self._channel = self._connection.get_channel()
+        self._channel = None
+
+    async def _ensure_channel(self):
+        """
+        Проверяет, есть ли активный канал, и создает новый, если его нет.
+        """
+        if not self._channel or self._channel.is_closed:
+            self._channel = self._connection.get_channel()
+
+        return self._channel
 
     async def send_messages(
-        self,
-        message: Dict[str, int],
-        queue_key: str = rabbit_config.PARSER_QUEUE,
+        self, message: str, queue_key: str = rabbit_config.PARSER_QUEUE
     ) -> None:
-
-        if self._channel is None or self._channel.is_closed:
-            logger.error("Невозможно отправить сообщение. Канал закрыт.")
+        """
+        Отправляет сообщение в RabbitMQ. Если канал закрыт, пытается восстановить соединение.
+        """
+        channel = await self._ensure_channel()
+        if not channel:
+            logger.error(
+                "Невозможно отправить сообщение. Канал отсутствует или закрыт."
+            )
             return
 
-        body = json.dumps(message).encode()
         try:
-            await self._channel.default_exchange.publish(
-                Message(body=body), routing_key=queue_key
+            await channel.default_exchange.publish(
+                Message(body=message.encode()), routing_key=queue_key
             )
-            logger.info(f"Отправка сообщения в очередь: {queue_key}")
+            logger.info(f"Отправлено сообщение в очередь: {queue_key}")
         except Exception as e:
             logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)
 
 
-publisher = Publisher(connection)
+publisher: IMessageSender = Publisher(connection)

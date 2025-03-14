@@ -1,7 +1,7 @@
-from src.parser.article_parser import ArticleParser
-from src.parser.cnn_parser import CNNParser
-from src.parser.http_requester import HttpRequester
-from src.parser.interfaces import INewsParser
+from news_system.src.parser.article_parser import ArticleParser
+from news_system.src.parser.cnn_parser import CNNParser
+from news_system.src.parser.http_requester import HttpRequester
+from news_system.src.parser.interfaces import INewsParser
 
 
 class ParserFactory:

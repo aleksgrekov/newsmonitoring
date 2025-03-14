@@ -2,9 +2,13 @@ from typing import Dict, List
 
 import aiohttp
 
-from src.configs.parser_config import parser_settings
-from src.logger.logger_config import configure_logging
-from src.parser.interfaces import IArticleParser, IHttpRequester, INewsParser
+from news_system.src.configs.parser_config import parser_settings
+from news_system.src.logger.logger_config import configure_logging
+from news_system.src.parser.interfaces import (
+    IArticleParser,
+    IHttpRequester,
+    INewsParser,
+)
 
 logger = configure_logging(__name__)
 

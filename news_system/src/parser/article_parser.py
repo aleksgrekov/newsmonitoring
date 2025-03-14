@@ -1,15 +1,15 @@
 import asyncio
 from asyncio import Semaphore
-from typing import Dict, List
+from typing import Any, Dict, List, Union
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
 from fake_useragent import UserAgent
 
-from src.configs.parser_config import parser_settings
-from src.logger.logger_config import configure_logging
-from src.parser.interfaces import IArticleParser
+from news_system.src.configs.parser_config import parser_settings
+from news_system.src.logger.logger_config import configure_logging
+from news_system.src.parser.interfaces import IArticleParser
 
 logger = configure_logging(__name__)
 async_semaphore = Semaphore(30)
@@ -71,7 +71,7 @@ class ArticleParser(IArticleParser):
         while True:
             try:
                 async with client.get(
-                    url, headers=self.__get_headers(), timeout=ClientTimeout(60)
+                    url, headers=self.__headers, timeout=ClientTimeout(60)
                 ) as response:
                     if response.status == 429:
                         logger.info(
@@ -108,15 +108,16 @@ class ArticleParser(IArticleParser):
                 logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
                 return {"full_text": "", "pub_date": None}
 
-    @staticmethod
-    def __get_user_agent():
+    @property
+    def __user_agent(self) -> str:
         user_agent = UserAgent().random
         return user_agent
 
-    def __get_headers(self):
+    @property
+    def __headers(self) -> Dict[str, Union[str, Any]]:
         return {
             "Accept": parser_settings.ACCEPT,
-            "User-Agent": self.__get_user_agent(),
+            "User-Agent": self.__user_agent,
             "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
             "Connection": parser_settings.CONNECTION,
         }

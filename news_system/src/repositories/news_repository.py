@@ -3,11 +3,11 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.handlers.custom_exceptions import IntegrityViolationException
-from src.logger.logger_config import configure_logging
-from src.models.news_model import News
-from src.parser.parser_factory import ParserFactory
-from src.rabbit.publisher import publisher
+from news_system.src.handlers.custom_exceptions import IntegrityViolationException
+from news_system.src.logger.logger_config import configure_logging
+from news_system.src.models.news_model import News
+from news_system.src.rabbit.publisher import publisher
+from news_system.src.parser.parser_factory import ParserFactory
 
 logger = configure_logging(__name__)
 
@@ -33,9 +33,9 @@ class NewsRepository:
 
         added_news_count = end_count - start_count
 
-        logger.info("В базу добавлено {} новостей!".format(added_news_count))
-
-        publisher.send_messages({"message": added_news_count})
+        message = "В базу добавлено {} новостей!".format(added_news_count)
+        logger.info(message)
+        await publisher.send_messages(message)
 
     @staticmethod
     async def _secure_commit(session: AsyncSession) -> None:

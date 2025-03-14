@@ -1,13 +1,13 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from aiohttp import ClientSession, ClientTimeout
 from fake_useragent import UserAgent
 
-from src.configs.parser_config import parser_settings
-from src.logger.logger_config import configure_logging
-from src.parser.interfaces import IHttpRequester
+from news_system.src.configs.parser_config import parser_settings
+from news_system.src.logger.logger_config import configure_logging
+from news_system.src.parser.interfaces import IHttpRequester
 
 logger = configure_logging(__name__)
 
@@ -46,7 +46,7 @@ class HttpRequester(IHttpRequester):
 
         try:
             async with client.get(
-                self.__url, headers=self.__get_headers(), timeout=ClientTimeout(15)
+                self.__url, headers=self.__headers, timeout=ClientTimeout(15)
             ) as response:
                 if response.status == 200:
                     content = await response.read()
@@ -59,15 +59,16 @@ class HttpRequester(IHttpRequester):
             logger.error(f"Ошибка при отправке запроса: {e}")
             return None
 
-    @staticmethod
-    def __get_user_agent():
+    @property
+    def __user_agent(self) -> str:
         user_agent = UserAgent().random
         return user_agent
 
-    def __get_headers(self):
+    @property
+    def __headers(self) -> Dict[str, Union[str, Any]]:
         return {
             "Accept": parser_settings.ACCEPT,
-            "User-Agent": self.__get_user_agent(),
+            "User-Agent": self.__user_agent,
             "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
             "Connection": parser_settings.CONNECTION,
         }
