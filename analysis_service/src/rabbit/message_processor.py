@@ -2,6 +2,7 @@ from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
 
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IMessageProcessor
+from analysis_service.src.repositories.news_repository import NewsRepository
 
 logger = configure_logging(__name__)
 
@@ -18,6 +19,7 @@ class MessageProcessor(IMessageProcessor):
         # try:
         body = message.body.decode()
         logger.info(f"{body}")
+        await NewsRepository.get_all_news()
 
         #
         #     # Добавление заказа в базу данных
