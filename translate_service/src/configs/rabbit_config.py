@@ -1,4 +1,4 @@
-from src.configs.base_config import Settings
+from translate_service.src.configs.base_config import Settings
 
 
 class RabbitConfig(Settings):
@@ -9,7 +9,7 @@ class RabbitConfig(Settings):
     RABBITMQ_LOCAL_HOST_NAME: str
     RABBITMQ_LOCAL_PORT: int
 
-    # PARSER_QUEUE: str
+    TRANSLATE_QUEUE: str
     FANOUT_EXCHANGE: str
 
     @property

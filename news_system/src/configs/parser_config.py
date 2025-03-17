@@ -1,4 +1,4 @@
-from src.configs.base_config import Settings
+from news_system.src.configs.base_config import Settings
 
 
 class ParserSettings(Settings):

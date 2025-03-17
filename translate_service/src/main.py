@@ -1,10 +1,10 @@
 import asyncio
 
-from analysis_service.src.configs.rabbit_config import rabbit_config
-from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.rabbit.consumer import WorkerService
-from analysis_service.src.rabbit.message_processor import MessageProcessor
-from analysis_service.src.rabbit.rabbit_connection import RabbitConnection
+from translate_service.src.configs.rabbit_config import rabbit_config
+from translate_service.src.logger.logger_config import configure_logging
+from translate_service.src.rabbit.consumer import WorkerService
+from translate_service.src.rabbit.message_processor import MessageProcessor
+from translate_service.src.rabbit.rabbit_connection import RabbitConnection
 
 logger = configure_logging(__name__)
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
             connection,
             processor,
             rabbit_config.FANOUT_EXCHANGE,
-            rabbit_config.ANALYSIS_QUEUE,
+            rabbit_config.TRANSLATE_QUEUE,
         )
 
         asyncio.run(worker.run())

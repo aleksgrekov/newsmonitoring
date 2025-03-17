@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import HTTPException, status
 
-from src.logger.logger_config import configure_logging
+from news_system.src.logger.logger_config import configure_logging
 
 logger = configure_logging(__name__)
 

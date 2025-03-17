@@ -7,9 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from analysis_service.src.logger.logger_config import configure_logging
 from database import NewsAnalysis, News
+
 from analysis_service.src.db.service import session_factory
-from src.text_analyzer.word_processor import analyze_text
-from src.schemas.analysis_schema import NewsAnalysisCreate
+from analysis_service.src.text_analyzer.word_processor import analyze_text
+from analysis_service.src.schemas.analysis_schema import NewsAnalysisCreate
 
 logger = configure_logging(__name__)
 
@@ -24,14 +25,13 @@ class NewsRepository:
             news_list = await cls._get_all_news(session)
             analyzed_news = [
                 NewsAnalysisCreate(
-                    sentiment=sentiment,
-                    keywords=", ".join(keywords),
+                    sentiment=analysis_result[0],
+                    keywords=", ".join(analysis_result[1]),
                     news_id=news_item.id,
                 ).model_dump()
                 for news_item in news_list
                 if (text := news_item.content or news_item.title)
-                and (sentiment := analyze_text(text)[0])
-                and (keywords := analyze_text(text)[1])
+                and (analysis_result := analyze_text(text))
             ]
             stmt = insert(NewsAnalysis).values(analyzed_news)
             stmt = stmt.on_conflict_do_nothing()

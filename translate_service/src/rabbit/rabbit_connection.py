@@ -1,9 +1,9 @@
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractChannel, AbstractConnection
 
-from analysis_service.src.configs.rabbit_config import rabbit_config
-from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.rabbit.interfaces import IConnection
+from translate_service.src.configs.rabbit_config import rabbit_config
+from translate_service.src.logger.logger_config import configure_logging
+from translate_service.src.rabbit.interfaces import IConnection
 
 logger = configure_logging(__name__)
 

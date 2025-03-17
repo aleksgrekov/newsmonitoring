@@ -1,6 +1,6 @@
 from typing import Optional
 
-from analysis_service.src.configs.base_config import Settings
+from translate_service.src.configs.base_config import Settings
 
 
 class DBSettings(Settings):

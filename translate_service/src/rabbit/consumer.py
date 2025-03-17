@@ -2,8 +2,8 @@ import asyncio
 
 from aio_pika import ExchangeType
 
-from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.rabbit.interfaces import IConnection, IMessageProcessor
+from translate_service.src.logger.logger_config import configure_logging
+from translate_service.src.rabbit.interfaces import IConnection, IMessageProcessor
 
 logger = configure_logging(__name__)
 
@@ -30,7 +30,7 @@ class WorkerService:
         Запускает воркер: подключается к RabbitMQ и подписывается на очередь.
         """
         try:
-            logger.info("Запуск Analysis Service")
+            logger.info("Запуск Translate Service")
 
             await self._connection.connect()
 

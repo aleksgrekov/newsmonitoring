@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import LastModified
+
 from news_system.src.handlers.custom_exceptions import IntegrityViolationException
 from news_system.src.logger.logger_config import configure_logging
 
