@@ -11,33 +11,62 @@ logger = configure_logging(__name__)
 
 
 class HttpRequester(IHttpRequester):
+    """
+    Класс для выполнения HTTP-запросов.
+    """
+
     def __init__(self):
+        """
+        Инициализация HTTP-запросчика.
+        """
         self.__url: str = parser_settings.NEWS_URL
 
     async def send_request(
-        self, client: "ClientSession", modified_header: Optional[str]
+        self, client: ClientSession, modified_header: Optional[str]
     ) -> Optional[bytes]:
+        """
+        Отправляет GET-запрос для получения HTML-контента.
+
+        :param client: Асинхронная HTTP-сессия.
+        :param modified_header: Заголовок Last-Modified.
+        :return: Байтовый HTML-контент или None в случае ошибки.
+        """
         if not modified_header:
             logger.error("Не передан модификатор заголовка или контент не изменился!")
             return None
 
         try:
-            async with client.get(
-                self.__url, headers=self.__headers, timeout=ClientTimeout(15)
-            ) as response:
-                if response.status == 200:
-                    content = await response.read()
-                    return content
-                else:
-                    logger.error(f"Ошибка при запросе: {response.status}")
-                    return None
+            return await self.__fetch_content(client)
         except Exception as e:
             logger.error(f"Ошибка при отправке запроса: {e}")
             return None
 
+    async def __fetch_content(self, client: ClientSession) -> Optional[bytes]:
+        """
+        Выполняет GET-запрос и возвращает контент.
+
+        :param client: Асинхронная HTTP-сессия.
+        :return: Байтовый HTML-контент или None в случае ошибки.
+        """
+        async with client.get(
+            self.__url, headers=self.__headers, timeout=ClientTimeout(15)
+        ) as response:
+            if response.status == 200:
+                return await response.read()
+            else:
+                logger.error(f"Ошибка при запросе: {response.status}")
+                return None
+
     async def fetch_and_compare(
-        self, client: "ClientSession", last_modified: Optional[str]
+        self, client: ClientSession, last_modified: Optional[str]
     ) -> Optional[str]:
+        """
+        Проверяет, изменился ли контент, сравнивая заголовок Last-Modified.
+
+        :param client: Асинхронная HTTP-сессия.
+        :param last_modified: Последнее значение заголовка Last-Modified.
+        :return: Новое значение заголовка Last-Modified или None, если контент не изменился.
+        """
         async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
             if response.status != 200:
                 logger.error(f"Не удалось получить заголовки для {self.__url}")
@@ -56,11 +85,20 @@ class HttpRequester(IHttpRequester):
 
     @property
     def __user_agent(self) -> str:
-        user_agent = UserAgent().random
-        return user_agent
+        """
+        Генерирует случайный User-Agent.
+
+        :return: Строка с User-Agent.
+        """
+        return UserAgent().random
 
     @property
     def __headers(self) -> Dict[str, Union[str, Any]]:
+        """
+        Возвращает заголовки для HTTP-запросов.
+
+        :return: Словарь с заголовками.
+        """
         return {
             "Accept": parser_settings.ACCEPT,
             "User-Agent": self.__user_agent,

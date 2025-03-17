@@ -6,6 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import LastModified
 from news_system.src.handlers.custom_exceptions import IntegrityViolationException
+from news_system.src.logger.logger_config import configure_logging
+
+logger = configure_logging(__name__)
 
 
 class LastModifiedRepository:
@@ -23,15 +26,19 @@ class LastModifiedRepository:
         response = request.scalars().one_or_none()
         return response.last_modified if response else None
 
-    async def update_header(self, session: AsyncSession, value: str) -> None:
+    @staticmethod
+    async def update_header(session: AsyncSession, value: Optional[str]) -> None:
         """
         Обновляет заголовок Last-Modified в базе данных.
 
         :param session: Асинхронная сессия SQLAlchemy.
-        :param value: Новое значение заголовка.
+        :param value: Новое значение заголовка. Если None, обновление не выполняется.
         """
-        await session.execute(update(LastModified).values(last_modified=value))
-        await self._secure_commit(session)
+        if value is not None:
+            await session.execute(update(LastModified).values(last_modified=value))
+            await LastModifiedRepository._secure_commit(session)
+        else:
+            logger.info("Заголовок Last-Modified отсутствует, обновление не требуется.")
 
     @staticmethod
     async def _secure_commit(session: AsyncSession) -> None:

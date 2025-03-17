@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,22 +22,21 @@ class NewsRepository:
         """Анализирует все новости и сохраняет результаты в базе данных."""
         async with session_factory() as session:
             news_list = await cls._get_all_news(session)
-
             analyzed_news = [
-                NewsAnalysis(
-                    **NewsAnalysisCreate(
-                        sentiment=sentiment,
-                        keywords=", ".join(keywords),
-                        news_id=news_item.id,
-                    ).model_dump()
-                )
+                NewsAnalysisCreate(
+                    sentiment=sentiment,
+                    keywords=", ".join(keywords),
+                    news_id=news_item.id,
+                ).model_dump()
                 for news_item in news_list
                 if (text := news_item.content or news_item.title)
                 and (sentiment := analyze_text(text)[0])
                 and (keywords := analyze_text(text)[1])
             ]
+            stmt = insert(NewsAnalysis).values(analyzed_news)
+            stmt = stmt.on_conflict_do_nothing()
 
-            session.add_all(analyzed_news)
+            await session.execute(stmt)
             await cls._secure_commit(session)
 
     @classmethod

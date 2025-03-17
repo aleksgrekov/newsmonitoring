@@ -7,8 +7,18 @@ from news_system.src.parser.interfaces import INewsParser
 
 
 class ParserFactory:
+    """
+    Фабрика для создания парсеров.
+    """
+
     @staticmethod
     def create_cnn_parser(session: AsyncSession) -> INewsParser:
-        http_requester = HttpRequester(session)
+        """
+        Создает парсер для CNN.
+
+        :param session: Асинхронная сессия SQLAlchemy.
+        :return: Объект парсера CNN.
+        """
+        http_requester = HttpRequester()
         article_parser = ArticleParser()
-        return CNNParser(http_requester, article_parser)
+        return CNNParser(session, http_requester, article_parser)
