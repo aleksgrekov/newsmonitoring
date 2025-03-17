@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./news_system/postgres_data:/var/lib/postgresql/data
+      - ./database/postgres_data:/var/lib/postgresql/data
   #    healthcheck:
   #      test: [ "CMD-SHELL", "pg_isready -U postgres -d news_db" ]
   #      interval: 10s

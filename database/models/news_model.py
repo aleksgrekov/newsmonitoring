@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from news_system.src.models.base_model import Base
+from models.base_model import Base
 
 
 class News(Base):

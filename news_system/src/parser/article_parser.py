@@ -12,7 +12,7 @@ from news_system.src.logger.logger_config import configure_logging
 from news_system.src.parser.interfaces import IArticleParser
 
 logger = configure_logging(__name__)
-async_semaphore = Semaphore(30)
+async_semaphore = Semaphore(50)
 
 
 class ArticleParser(IArticleParser):

@@ -12,3 +12,13 @@ engine = create_async_engine(DB_URL)
 session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
     bind=engine, expire_on_commit=False
 )
+
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Асинхронный генератор сессии базы данных.
+
+    Используется в качестве зависимости в обработчиках FastAPI.
+    """
+    async with session_factory() as session:
+        yield session

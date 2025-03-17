@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks
 
-from news_system.src.database.service import DBSession
+from database.service import DBSession
 from news_system.src.repositories.news_repository import NewsRepository
 
 router = APIRouter(prefix="/news")

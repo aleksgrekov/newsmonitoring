@@ -5,8 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.models.news_model import News
-from analysis_service.src.database.service import session_factory
+from database import News
+from analysis_service.src.db.service import session_factory
 from src.text_analyzer.word_processor import analyze_text
 
 logger = configure_logging(__name__)
