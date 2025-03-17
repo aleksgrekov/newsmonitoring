@@ -12,7 +12,9 @@ class IHttpRequester(ABC):
         pass
 
     @abstractmethod
-    async def fetch_and_compare(self, client: "ClientSession") -> Optional[str]:
+    async def fetch_and_compare(
+        self, client: "ClientSession", last_modified: Optional[str]
+    ) -> Optional[str]:
         pass
 
     @abstractmethod

@@ -18,7 +18,7 @@ class NewsRepository:
 
     @classmethod
     async def add_all_news_from_parser(cls, session: AsyncSession) -> None:
-        parser = ParserFactory.create_cnn_parser()
+        parser = ParserFactory.create_cnn_parser(session)
         news_data = await parser.collect_news()
         news = news_data.news
         if not news:

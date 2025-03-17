@@ -22,5 +22,7 @@ class MessageProcessor(IMessageProcessor):
             await NewsRepository.text_analysis()
 
             await message.ack()
+            logger.info(f"Анализ новостей окончен!")
+
         except Exception as e:
-            logger.error(f"Ошибка при обработке заказа: {e}")
+            logger.error(f"Ошибка при обработке сообщения: {e}")

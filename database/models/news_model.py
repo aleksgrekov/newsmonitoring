@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Text, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base_model import Base
 
@@ -14,6 +14,13 @@ class News(Base):
     content: Mapped[Optional[str]] = mapped_column(Text)
     pub_date: Mapped[Optional[datetime]]
     url: Mapped[str] = mapped_column(String(255))
+
+    analysis = relationship(
+        "NewsAnalysis",
+        back_populates="news",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
 
     def __repr__(self):
         return (

@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from aiohttp import ClientSession, ClientTimeout
@@ -14,28 +12,7 @@ logger = configure_logging(__name__)
 
 class HttpRequester(IHttpRequester):
     def __init__(self):
-        self.__url = parser_settings.NEWS_URL
-        self.__last_modified_file = Path("last_modified.json")
-        self.last_modified = None
-        self.__load_last_modified()
-
-    async def fetch_and_compare(self, client: "ClientSession") -> Optional[str]:
-        async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
-            if response.status != 200:
-                logger.error(f"Не удалось получить заголовки для {self.__url}")
-                return None
-
-            last_modified_header = response.headers.get("x-last-modified")
-            if not last_modified_header:
-                logger.warning("Заголовок 'x-last-modified' отсутствует.")
-                return None
-            logger.info(f"Last-Modified: {last_modified_header}")
-
-            if last_modified_header == self.last_modified:
-                logger.info("Контент не изменился. Используем сохраненный файл.")
-                return None
-
-            return last_modified_header
+        self.__url: str = parser_settings.NEWS_URL
 
     async def send_request(
         self, client: "ClientSession", modified_header: Optional[str]
@@ -50,7 +27,6 @@ class HttpRequester(IHttpRequester):
             ) as response:
                 if response.status == 200:
                     content = await response.read()
-                    self.__save_last_modified(modified_header)
                     return content
                 else:
                     logger.error(f"Ошибка при запросе: {response.status}")
@@ -58,6 +34,25 @@ class HttpRequester(IHttpRequester):
         except Exception as e:
             logger.error(f"Ошибка при отправке запроса: {e}")
             return None
+
+    async def fetch_and_compare(
+        self, client: "ClientSession", last_modified: Optional[str]
+    ) -> Optional[str]:
+        async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
+            if response.status != 200:
+                logger.error(f"Не удалось получить заголовки для {self.__url}")
+                return None
+
+            last_modified_header = response.headers.get("x-last-modified")
+            if not last_modified_header:
+                logger.warning("Заголовок 'x-last-modified' отсутствует.")
+                return None
+            logger.info(f"Last-Modified: {last_modified_header}")
+
+            if last_modified_header == last_modified:
+                logger.info("Контент не изменился. В БД актуальные данные.")
+                return None
+            return last_modified_header
 
     @property
     def __user_agent(self) -> str:
@@ -72,20 +67,3 @@ class HttpRequester(IHttpRequester):
             "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
             "Connection": parser_settings.CONNECTION,
         }
-
-    def __load_last_modified(self):
-        if self.__last_modified_file.exists():
-            try:
-                with self.__last_modified_file.open("r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    self.last_modified = data.get("last_modified")
-            except (json.JSONDecodeError, OSError) as e:
-                logger.error(f"Ошибка при загрузке last_modified: {e}")
-                self.last_modified = None
-
-    def __save_last_modified(self, value: str):
-        try:
-            with self.__last_modified_file.open("w", encoding="utf-8") as f:
-                json.dump({"last_modified": value}, f)
-        except OSError as e:
-            logger.error(f"Ошибка при сохранении last_modified: {e}")

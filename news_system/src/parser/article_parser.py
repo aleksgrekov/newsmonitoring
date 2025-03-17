@@ -33,6 +33,7 @@ class ArticleParser(IArticleParser):
                 *tasks,
                 return_exceptions=True,
             )
+
             return [
                 result
                 for result in results
@@ -61,7 +62,7 @@ class ArticleParser(IArticleParser):
                 article_data = await self.__parse_article_page(client, link)
                 return {"title": title, "url": link, **article_data}
             except Exception as e:
-                logger.error(f"Ошибка при парсинге контейнера: {e}")
+                logger.error(f"Ошибка при парсинге контейнера:\n{link=}\n{e}")
                 return {}
 
     async def __parse_article_page(

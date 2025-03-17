@@ -1,3 +1,5 @@
+from typing import Tuple, List
+
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -10,27 +12,29 @@ nltk.download("punkt_tab")
 nltk.download("stopwords")
 nltk.download("wordnet")
 
-stop_words = set(stopwords.words("english"))
-lemmatizer = WordNetLemmatizer()
+# Инициализируем вспомогательные объекты
+STOP_WORDS = set(stopwords.words("english"))
+LEMMATIZER = WordNetLemmatizer()
 
 
-# Функция очистки текста
-def preprocess_text(text):
-    words = word_tokenize(text.lower())  # Токенизация + приведение к нижнему регистру
-    words = [word for word in words if word.isalnum()]  # Убираем знаки препинания
-    words = [word for word in words if word not in stop_words]  # Убираем стоп-слова
-    words = [lemmatizer.lemmatize(word) for word in words]  # Лемматизация
-    return " ".join(words)  # Возвращаем обработанный текст
+def preprocess_text(text: str) -> str:
+    """Очищает и нормализует текст."""
+    words = word_tokenize(text.lower())  # Приводим к нижнему регистру и токенизируем
+    words = [
+        word for word in words if word.isalnum() and word not in STOP_WORDS
+    ]  # Убираем знаки препинания и стоп-слова
+    words = [LEMMATIZER.lemmatize(word) for word in words]  # Лемматизируем
+    return " ".join(words)
 
 
-# Функция анализа текста
-def analyze_text(text):
+def analyze_text(text: str) -> Tuple[float, List[str]]:
+    """Анализирует текст, возвращая тональность и ключевые слова."""
     processed_text = preprocess_text(text)
     blob = TextBlob(processed_text)
 
-    sentiment = (
-        blob.sentiment.polarity
-    )  # Тональность текста (-1 -> негатив, 0 -> нейтральный, 1 -> позитив)
-    keywords = list(set(processed_text.split()))[:10]
+    sentiment = blob.sentiment.polarity  # [-1, 1] (негативный, нейтральный, позитивный)
+    keywords = sorted(set(processed_text.split()), key=len, reverse=True)[
+        :10
+    ]  # Берем 10 самых длинных слов
 
     return sentiment, keywords
