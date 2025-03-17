@@ -17,9 +17,13 @@ class News(Base):
 
     analysis = relationship(
         "NewsAnalysis",
-        back_populates="news",
+        back_populates="news_analyse",
         cascade="all, delete",
         passive_deletes=True,
+    )
+    translations = relationship(
+        "News",
+        back_populates="news_translation",
     )
 
     def __repr__(self):

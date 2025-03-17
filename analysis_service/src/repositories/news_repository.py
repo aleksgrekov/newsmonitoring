@@ -1,7 +1,6 @@
 from typing import Sequence
 
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import select, exists
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,7 +21,7 @@ class NewsRepository:
     async def text_analysis(cls) -> None:
         """Анализирует все новости и сохраняет результаты в базе данных."""
         async with session_factory() as session:
-            news_list = await cls._get_all_news(session)
+            news_list = await cls._get_unanalyzed_news(session)
             analyzed_news = [
                 NewsAnalysisCreate(
                     sentiment=analysis_result[0],
@@ -33,16 +32,14 @@ class NewsRepository:
                 if (text := news_item.content or news_item.title)
                 and (analysis_result := analyze_text(text))
             ]
-            stmt = insert(NewsAnalysis).values(analyzed_news)
-            stmt = stmt.on_conflict_do_nothing()
-
-            await session.execute(stmt)
+            session.add_all(analyzed_news)
             await cls._secure_commit(session)
 
     @classmethod
-    async def _get_all_news(cls, session: AsyncSession) -> Sequence[News]:
-        """Получает все новости из базы данных."""
-        result = await session.execute(select(News))
+    async def _get_unanalyzed_news(cls, session: AsyncSession) -> Sequence[News]:
+        """Получает новости, для которых еще нет записей в таблице NewsAnalysis."""
+        stmt = select(News).where(~exists().where(NewsAnalysis.news_id == News.id))
+        result = await session.execute(stmt)
         return result.scalars().all()
 
     @classmethod

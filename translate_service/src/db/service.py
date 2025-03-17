@@ -2,7 +2,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from analysis_service.src.configs.db_config import db_settings
+from translate_service.src.configs.db_config import db_settings
 
 # Создаем асинхронный движок базы данных
 DB_URL: str = db_settings.db_url(driver="asyncpg")
