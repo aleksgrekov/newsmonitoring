@@ -49,12 +49,11 @@ class IMessageSender(ABC):
     """
 
     @abstractmethod
-    async def send_messages(self, message: str, exchange_name: str) -> None:
+    async def send_messages(self, message: str) -> None:
         """
         Отправляет сообщение в указанный обменник (exchange).
 
         Args:
             message (str): Сообщение для отправки.
-            exchange_name (str): Имя обменника (exchange).
         """
         pass

@@ -9,7 +9,6 @@ from news_system.src.logger.logger_config import configure_logging
 from news_system.src.parser.parser_factory import ParserFactory
 from news_system.src.rabbit.publisher import publisher
 from news_system.src.schemas.base_schemas import SuccessResponse
-from news_system.src.configs.rabbit_config import rabbit_config
 
 logger = configure_logging(__name__)
 
@@ -38,9 +37,7 @@ class NewsRepository:
 
         logger.info("В базу добавлено {} новостей!".format(added_news_count))
         message = SuccessResponse(message=news_data.header)
-        await publisher.send_messages(
-            message.model_dump_json(), exchange_name=rabbit_config.FANOUT_EXCHANGE
-        )
+        await publisher.send_messages(message.model_dump_json())
 
     @staticmethod
     async def _secure_commit(session: AsyncSession) -> None:
