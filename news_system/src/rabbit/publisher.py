@@ -44,7 +44,7 @@ class Publisher(IMessageSender):
             ConnectionError: Если канал не удалось создать.
         """
         if not self._channel or self._channel.is_closed:
-            self._channel = await self._connection.get_channel()
+            self._channel = self._connection.get_channel()
 
         return self._channel
 
@@ -58,7 +58,7 @@ class Publisher(IMessageSender):
         if not self._exchange:
             channel = await self._ensure_channel()
             self._exchange = await channel.declare_exchange(
-                self._exchange_name, ExchangeType.FANOUT, durable=True, passive=False
+                self._exchange_name, ExchangeType.FANOUT, durable=True
             )
             logger.info(f"Обменник {self._exchange_name} был создан.")
 

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Sequence
 
 from sqlalchemy import select, exists
@@ -9,7 +10,6 @@ from database import NewsAnalysis, News
 
 from analysis_service.src.db.service import session_factory
 from analysis_service.src.text_analyzer.word_processor import analyze_text
-from analysis_service.src.schemas.analysis_schema import NewsAnalysisCreate
 
 logger = configure_logging(__name__)
 
@@ -23,17 +23,18 @@ class NewsRepository:
         async with session_factory() as session:
             news_list = await cls._get_unanalyzed_news(session)
             analyzed_news = [
-                NewsAnalysisCreate(
+                NewsAnalysis(
                     sentiment=analysis_result[0],
                     keywords=", ".join(analysis_result[1]),
                     news_id=news_item.id,
-                ).model_dump()
+                )
                 for news_item in news_list
                 if (text := news_item.content or news_item.title)
                 and (analysis_result := analyze_text(text))
             ]
-            session.add_all(analyzed_news)
-            await cls._secure_commit(session)
+            if analyzed_news:
+                session.add_all(analyzed_news)
+                await cls._secure_commit(session)
 
     @classmethod
     async def _get_unanalyzed_news(cls, session: AsyncSession) -> Sequence[News]:
@@ -50,3 +51,7 @@ class NewsRepository:
         except IntegrityError as exc:
             logger.error("Ошибка целостности данных: %s", exc)
             await session.rollback()
+
+
+news_repository = NewsRepository()
+asyncio.run(news_repository.text_analysis())

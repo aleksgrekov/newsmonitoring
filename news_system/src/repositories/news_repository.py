@@ -14,41 +14,82 @@ logger = configure_logging(__name__)
 
 
 class NewsRepository:
+    """
+    Репозиторий для работы с новостями.
+
+    Методы:
+        - add_all_news_from_parser: Добавляет новости, полученные от парсера, в базу данных.
+        - _secure_commit: Безопасно выполняет commit.
+    """
 
     @classmethod
     async def add_all_news_from_parser(cls, session: AsyncSession) -> None:
+        """
+        Добавляет новости, полученные от парсера, в базу данных.
+
+        Args:
+            session (AsyncSession): Асинхронная сессия SQLAlchemy.
+        """
         parser = ParserFactory.create_cnn_parser(session)
         news_data = await parser.collect_news()
         news = news_data.news
+
         if not news:
+            logger.info("Нет новых новостей для добавления.")
             return
 
-        start_count = (await session.execute(func.count(News.id))).scalar()
+        start_count = await cls._get_news_count(session)
 
-        stmt = insert(News).values([data.model_dump() for data in news])
-        stmt = stmt.on_conflict_do_nothing()
-
-        await session.execute(stmt)
+        await cls._insert_news(session, news)
         await cls._secure_commit(session)
 
-        end_count = (await session.execute(func.count(News.id))).scalar()
-
+        end_count = await cls._get_news_count(session)
         added_news_count = end_count - start_count
 
-        logger.info("В базу добавлено {} новостей!".format(added_news_count))
+        logger.info(f"В базу добавлено {added_news_count} новостей!")
         message = SuccessResponse(message=news_data.header)
         await publisher.send_messages(message.model_dump_json())
+
+    @staticmethod
+    async def _get_news_count(session: AsyncSession) -> int:
+        """
+        Получает текущее количество новостей в базе данных.
+
+        Args:
+            session (AsyncSession): Асинхронная сессия SQLAlchemy.
+
+        Returns:
+            int: Количество новостей.
+        """
+        result = await session.execute(func.count(News.id))
+        return result.scalar()
+
+    @staticmethod
+    async def _insert_news(session: AsyncSession, news: list) -> None:
+        """
+        Вставляет новости в базу данных.
+
+        Args:
+            session (AsyncSession): Асинхронная сессия SQLAlchemy.
+            news (list): Список новостей для вставки.
+        """
+        stmt = insert(News).values([data.model_dump() for data in news])
+        stmt = stmt.on_conflict_do_nothing()
+        await session.execute(stmt)
 
     @staticmethod
     async def _secure_commit(session: AsyncSession) -> None:
         """
         Безопасно выполняет commit в базу данных.
 
-        :param session: Асинхронная сессия SQLAlchemy.
-        :raises IntegrityViolationException: Если возникает ошибка целостности данных.
+        Args:
+            session (AsyncSession): Асинхронная сессия SQLAlchemy.
+
+        Raises:
+            IntegrityViolationException: Если возникает ошибка целостности данных.
         """
         try:
             await session.commit()
-        except IntegrityError as exc:  # Обработка ошибок целостности
+        except IntegrityError as exc:
             await session.rollback()
             raise IntegrityViolationException(str(exc))
