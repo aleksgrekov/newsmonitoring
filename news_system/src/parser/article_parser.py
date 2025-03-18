@@ -1,6 +1,6 @@
 import asyncio
 from asyncio import Semaphore
-from typing import Any, Dict, List, Coroutine, Union, Tuple, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from bs4 import BeautifulSoup
@@ -68,11 +68,17 @@ class ArticleParser(IArticleParser):
         Returns:
             List[Dict[str, str]]: Список словарей с результатами парсинга.
         """
-        tasks = (
-            self.__parse_cnn_container(container, client)
-            for container in containers
-            if container
-        )
+        tasks = []
+        for index, container in enumerate(containers):
+            if container:
+                tasks.append(self.__parse_cnn_container(container, client))
+            if index == 10:  # Ограничение на количество парсинга для тестирования
+                break
+        # tasks = (
+        #     self.__parse_cnn_container(container, client)
+        #     for container in containers
+        #     if container
+        # )
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [
             result for result in results if isinstance(result, dict) and bool(result)

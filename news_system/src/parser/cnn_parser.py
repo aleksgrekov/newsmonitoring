@@ -1,5 +1,6 @@
 import traceback
 from typing import List, Dict, Optional
+
 import aiohttp
 from aiohttp import ClientSession
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,10 +34,11 @@ class CNNParser(INewsParser):
         """
         Инициализация парсера.
 
-        :param session: Асинхронная сессия SQLAlchemy.
-        :param http_requester: Объект для выполнения HTTP-запросов.
-        :param article_parser: Парсер для извлечения данных о статьях.
-        :param last_modified_repository: Репозиторий для работы с Last-Modified.
+        Args:
+            session (AsyncSession): Асинхронная сессия SQLAlchemy.
+            http_requester (IHttpRequester): Объект для выполнения HTTP-запросов.
+            article_parser (IArticleParser): Парсер для извлечения данных о статьях.
+            last_modified_repository (LastModifiedRepository): Репозиторий для работы с Last-Modified.
         """
         self.__url = parser_settings.NEWS_URL
         self.__session = session
@@ -48,7 +50,8 @@ class CNNParser(INewsParser):
         """
         Собирает новости с CNN.
 
-        :return: Объект NewsResponseSchema с данными о новостях.
+        Returns:
+            NewsResponseSchema: Объект с данными о новостях.
         """
         try:
             async with aiohttp.ClientSession(
@@ -81,8 +84,11 @@ class CNNParser(INewsParser):
         """
         Получает заголовок Last-Modified.
 
-        :param client: Асинхронная HTTP-сессия.
-        :return: Заголовок Last-Modified или None.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+
+        Returns:
+            Optional[str]: Заголовок Last-Modified или None.
         """
         last_modified_value = await self.__last_modified_repository.get_header(
             self.__session
@@ -96,8 +102,11 @@ class CNNParser(INewsParser):
         """
         Валидирует данные о новостях.
 
-        :param news_list: Список словарей с данными о новостях.
-        :return: Список валидированных объектов NewsSchema.
+        Args:
+            news_list (List[Dict[str, str]]): Список словарей с данными о новостях.
+
+        Returns:
+            List[NewsSchema]: Список валидированных объектов NewsSchema.
         """
         validated_news = []
         try:
@@ -110,7 +119,8 @@ class CNNParser(INewsParser):
         """
         Обновляет значение Last-Modified в базе данных.
 
-        :param modified_header: Новое значение заголовка Last-Modified.
+        Args:
+            modified_header (Optional[str]): Новое значение заголовка Last-Modified.
         """
         await self.__last_modified_repository.update_header(
             self.__session, modified_header

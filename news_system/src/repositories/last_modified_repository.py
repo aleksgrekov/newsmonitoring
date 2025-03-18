@@ -31,16 +31,18 @@ class LastModifiedRepository:
         """
         Обновляет заголовок Last-Modified в базе данных.
 
-        Если записи нет, вставляется новая запись.
+        Если записи нет, вставляется новая запись с id=1.
 
         :param session: Асинхронная сессия SQLAlchemy.
         :param value: Новое значение заголовка. Если None, обновление не выполняется.
         """
         if value is not None:
+            # Проверяем, существует ли запись
             result = await session.execute(select(exists().where(LastModified.id == 1)))
             record_exists = result.scalar()
 
             if record_exists:
+                # Если запись существует, обновляем
                 await session.execute(
                     update(LastModified)
                     .values(last_modified=value)
@@ -48,7 +50,8 @@ class LastModifiedRepository:
                 )
                 logger.info("Заголовок Last-Modified обновлен.")
             else:
-                new_record = LastModified(last_modified=value)
+                # Если записи нет, создаём новую с id=1
+                new_record = LastModified(id=1, last_modified=value)
                 session.add(new_record)
                 logger.info("Заголовок Last-Modified добавлен в базу данных.")
 
