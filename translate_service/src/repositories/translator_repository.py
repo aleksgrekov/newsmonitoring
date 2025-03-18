@@ -16,16 +16,16 @@ logger = configure_logging(__name__)
 class TranslatorRepository:
     """Репозиторий для работы с переводами новостей."""
 
+    translation_service = TranslationService()
+
     @classmethod
     async def translate(cls) -> None:
         """Переводит все новости, которые еще не были переведены."""
         async with session_factory() as session:
             news_list = await cls._get_untranslated_news(session)
 
-            translation_service = TranslationService()
-
             translated_news = await asyncio.gather(
-                *(translation_service.translate_news(article) for article in news_list)
+                *(cls.translation_service.translate_news(article) for article in news_list)
             )
 
             translations = [
