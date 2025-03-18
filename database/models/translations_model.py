@@ -12,10 +12,6 @@ class Translation(Base):
     content: Mapped[Optional[str]] = mapped_column(Text)
     news_id: Mapped[int] = mapped_column(ForeignKey("news.id", ondelete="CASCADE"))
 
-    news_analyse = relationship(
-        "News",
-        back_populates="analysis",
-    )
     news_translation = relationship(
         "News",
         back_populates="translations",

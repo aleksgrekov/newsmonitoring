@@ -3,7 +3,12 @@ from pydantic import BaseModel, Field
 
 class SuccessResponse(BaseModel):
     """
-    Схема для успешного ответа. Используется для передачи подтверждения выполнения операции.
+    Схема для успешного ответа API.
+
+    Используется для передачи подтверждения выполнения операции.
+
+    Attributes:
+        message (str): Сообщение, подтверждающее успешное выполнение операции.
     """
 
     message: str = Field(
@@ -15,7 +20,13 @@ class SuccessResponse(BaseModel):
 
 class ErrorResponseSchema(BaseModel):
     """
-    Схема для ответа об ошибке. Используется для отправки информации о возникшей ошибке.
+    Схема для ответа API об ошибке.
+
+    Используется для отправки информации о возникшей ошибке.
+
+    Attributes:
+        type (str): Тип ошибки, например, 'ValidationError' или 'InternalServerError'.
+        message (str): Сообщение, содержащее подробности об ошибке.
     """
 
     type: str = Field(

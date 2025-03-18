@@ -1,6 +1,5 @@
-from aio_pika import Message, ExchangeType
+from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel
-
 from news_system.src.configs.rabbit_config import rabbit_config
 from news_system.src.logger.logger_config import configure_logging
 from news_system.src.rabbit.interfaces import IConnection, IMessageSender
@@ -10,6 +9,14 @@ logger = configure_logging(__name__)
 
 
 class Publisher(IMessageSender):
+    """
+    Класс для отправки сообщений в RabbitMQ.
+
+    Attributes:
+        _connection (IConnection): Подключение к RabbitMQ.
+        _channel (AbstractChannel | None): Канал для работы с RabbitMQ.
+    """
+
     def __init__(self, conn: IConnection):
         self._connection = conn
         self._channel = None
@@ -18,8 +25,11 @@ class Publisher(IMessageSender):
         """
         Проверяет, есть ли активный канал, и создает новый, если его нет.
 
-        :return: Активный канал RabbitMQ.
-        :raises ConnectionError: Если канал не удалось создать.
+        Returns:
+            AbstractChannel: Активный канал RabbitMQ.
+
+        Raises:
+            ConnectionError: Если канал не удалось создать.
         """
         if not self._channel or self._channel.is_closed:
             self._channel = self._connection.get_channel()
@@ -32,10 +42,14 @@ class Publisher(IMessageSender):
         exchange_name: str = rabbit_config.FANOUT_EXCHANGE,
     ) -> None:
         """
-        Отправляет сообщение в Fanout Exchange.
+        Отправляет сообщение в указанный обменник (exchange).
 
-        :param message: Сообщение для отправки.
-        :param exchange_name: Имя Fanout Exchange.
+        Args:
+            message (str): Сообщение для отправки.
+            exchange_name (str): Имя обменника (exchange). По умолчанию используется FANOUT_EXCHANGE.
+
+        Raises:
+            Exception: Если произошла ошибка при отправке сообщения.
         """
         try:
             channel = await self._ensure_channel()

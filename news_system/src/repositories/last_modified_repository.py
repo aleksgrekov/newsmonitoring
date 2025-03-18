@@ -1,11 +1,10 @@
 from typing import Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, exists
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import LastModified
-
 from news_system.src.handlers.custom_exceptions import IntegrityViolationException
 from news_system.src.logger.logger_config import configure_logging
 
@@ -32,11 +31,27 @@ class LastModifiedRepository:
         """
         Обновляет заголовок Last-Modified в базе данных.
 
+        Если записи нет, вставляется новая запись.
+
         :param session: Асинхронная сессия SQLAlchemy.
         :param value: Новое значение заголовка. Если None, обновление не выполняется.
         """
         if value is not None:
-            await session.execute(update(LastModified).values(last_modified=value))
+            result = await session.execute(select(exists().where(LastModified.id == 1)))
+            record_exists = result.scalar()
+
+            if record_exists:
+                await session.execute(
+                    update(LastModified)
+                    .values(last_modified=value)
+                    .where(LastModified.id == 1)
+                )
+                logger.info("Заголовок Last-Modified обновлен.")
+            else:
+                new_record = LastModified(last_modified=value)
+                session.add(new_record)
+                logger.info("Заголовок Last-Modified добавлен в базу данных.")
+
             await LastModifiedRepository._secure_commit(session)
         else:
             logger.info("Заголовок Last-Modified отсутствует, обновление не требуется.")

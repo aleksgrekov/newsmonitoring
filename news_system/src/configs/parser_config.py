@@ -2,6 +2,17 @@ from news_system.src.configs.base_config import Settings
 
 
 class ParserSettings(Settings):
+    """
+    Класс для управления настройками парсера новостей.
+
+    Настройки загружаются из переменных окружения или файла `.env`.
+
+    Attributes:
+        NEWS_URL (str): URL для парсинга новостей.
+        ACCEPT (str): Заголовок Accept для HTTP-запросов.
+        ACCEPT_LANGUAGE (str): Заголовок Accept-Language для HTTP-запросов.
+        CONNECTION (str): Заголовок Connection для HTTP-запросов.
+    """
 
     NEWS_URL: str
     ACCEPT: str
@@ -9,5 +20,4 @@ class ParserSettings(Settings):
     CONNECTION: str
 
 
-# Создание глобального экземпляра настроек базы данных
-parser_settings: ParserSettings = ParserSettings()  # type: ignore
+parser_settings: ParserSettings = ParserSettings()

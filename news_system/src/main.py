@@ -2,9 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from news_system.src.logger.logger_config import configure_logging
 from news_system.src.api.base_router import base_router
 from news_system.src.handlers.base_handler import exception_handler
+from news_system.src.logger.logger_config import configure_logging
 from news_system.src.rabbit.rabbit_connection import connection
 
 logger = configure_logging(__name__)

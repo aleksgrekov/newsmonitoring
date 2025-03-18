@@ -1,5 +1,4 @@
 from typing import Any, Dict, Optional, Union
-
 from aiohttp import ClientSession, ClientTimeout
 from fake_useragent import UserAgent
 
@@ -19,7 +18,22 @@ class HttpRequester(IHttpRequester):
         """
         Инициализация HTTP-запросчика.
         """
-        self.__url: str = parser_settings.NEWS_URL
+        self.__url = parser_settings.NEWS_URL
+        self.__headers = self.__generate_headers()
+
+    def __generate_headers(self) -> Dict[str, Union[str, Any]]:
+        """
+        Генерирует заголовки для HTTP-запросов.
+
+        Returns:
+            Dict[str, Union[str, Any]]: Словарь с заголовками.
+        """
+        return {
+            "Accept": parser_settings.ACCEPT,
+            "User-Agent": self.__user_agent,
+            "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
+            "Connection": parser_settings.CONNECTION,
+        }
 
     async def send_request(
         self, client: ClientSession, modified_header: Optional[str]
@@ -27,9 +41,12 @@ class HttpRequester(IHttpRequester):
         """
         Отправляет GET-запрос для получения HTML-контента.
 
-        :param client: Асинхронная HTTP-сессия.
-        :param modified_header: Заголовок Last-Modified.
-        :return: Байтовый HTML-контент или None в случае ошибки.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+            modified_header (Optional[str]): Заголовок Last-Modified.
+
+        Returns:
+            Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
         if not modified_header:
             logger.error("Не передан модификатор заголовка или контент не изменился!")
@@ -45,8 +62,11 @@ class HttpRequester(IHttpRequester):
         """
         Выполняет GET-запрос и возвращает контент.
 
-        :param client: Асинхронная HTTP-сессия.
-        :return: Байтовый HTML-контент или None в случае ошибки.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+
+        Returns:
+            Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
         async with client.get(
             self.__url, headers=self.__headers, timeout=ClientTimeout(15)
@@ -54,7 +74,9 @@ class HttpRequester(IHttpRequester):
             if response.status == 200:
                 return await response.read()
             else:
-                logger.error(f"Ошибка при запросе: {response.status}")
+                logger.error(
+                    f"Ошибка при запросе к {self.__url}: Статус {response.status}"
+                )
                 return None
 
     async def fetch_and_compare(
@@ -63,19 +85,25 @@ class HttpRequester(IHttpRequester):
         """
         Проверяет, изменился ли контент, сравнивая заголовок Last-Modified.
 
-        :param client: Асинхронная HTTP-сессия.
-        :param last_modified: Последнее значение заголовка Last-Modified.
-        :return: Новое значение заголовка Last-Modified или None, если контент не изменился.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+            last_modified (Optional[str]): Последнее значение заголовка Last-Modified.
+
+        Returns:
+            Optional[str]: Новое значение заголовка Last-Modified или None, если контент не изменился.
         """
         async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
             if response.status != 200:
-                logger.error(f"Не удалось получить заголовки для {self.__url}")
+                logger.error(
+                    f"Не удалось получить заголовки для {self.__url}. Статус: {response.status}"
+                )
                 return None
 
             last_modified_header = response.headers.get("x-last-modified")
             if not last_modified_header:
                 logger.warning("Заголовок 'x-last-modified' отсутствует.")
                 return None
+
             logger.info(f"Last-Modified: {last_modified_header}")
 
             if last_modified_header == last_modified:
@@ -88,20 +116,7 @@ class HttpRequester(IHttpRequester):
         """
         Генерирует случайный User-Agent.
 
-        :return: Строка с User-Agent.
+        Returns:
+            str: Строка с User-Agent.
         """
         return UserAgent().random
-
-    @property
-    def __headers(self) -> Dict[str, Union[str, Any]]:
-        """
-        Возвращает заголовки для HTTP-запросов.
-
-        :return: Словарь с заголовками.
-        """
-        return {
-            "Accept": parser_settings.ACCEPT,
-            "User-Agent": self.__user_agent,
-            "Accept-Language": parser_settings.ACCEPT_LANGUAGE,
-            "Connection": parser_settings.CONNECTION,
-        }

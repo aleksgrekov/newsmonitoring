@@ -10,7 +10,7 @@ class NewsAnalysis(Base):
     keywords: Mapped[str] = mapped_column(String)
     news_id: Mapped[int] = mapped_column(ForeignKey("news.id", ondelete="CASCADE"))
 
-    news = relationship(
+    news_analyse = relationship(
         "News",
         back_populates="analysis",
     )

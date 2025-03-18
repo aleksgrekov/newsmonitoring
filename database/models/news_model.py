@@ -22,7 +22,7 @@ class News(Base):
         passive_deletes=True,
     )
     translations = relationship(
-        "News",
+        "Translation",
         back_populates="news_translation",
     )
 

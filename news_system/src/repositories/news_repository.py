@@ -4,11 +4,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import News
-
 from news_system.src.handlers.custom_exceptions import IntegrityViolationException
 from news_system.src.logger.logger_config import configure_logging
-from news_system.src.rabbit.publisher import publisher
 from news_system.src.parser.parser_factory import ParserFactory
+from news_system.src.rabbit.publisher import publisher
 from news_system.src.schemas.base_schemas import SuccessResponse
 
 logger = configure_logging(__name__)

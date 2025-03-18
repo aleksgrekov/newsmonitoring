@@ -18,9 +18,12 @@ class IHttpRequester(ABC):
         """
         Проверяет, изменился ли контент, сравнивая заголовок Last-Modified.
 
-        :param client: Асинхронная HTTP-сессия.
-        :param last_modified: Последнее значение заголовка Last-Modified.
-        :return: Новое значение заголовка Last-Modified или None, если контент не изменился.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+            last_modified (Optional[str]): Последнее значение заголовка Last-Modified.
+
+        Returns:
+            Optional[str]: Новое значение заголовка Last-Modified, если контент изменился, иначе None.
         """
         pass
 
@@ -31,9 +34,12 @@ class IHttpRequester(ABC):
         """
         Отправляет GET-запрос для получения HTML-контента.
 
-        :param client: Асинхронная HTTP-сессия.
-        :param modified_header: Заголовок Last-Modified.
-        :return: Байтовый HTML-контент или None в случае ошибки.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+            modified_header (Optional[str]): Заголовок Last-Modified, если он есть.
+
+        Returns:
+            Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
         pass
 
@@ -50,9 +56,12 @@ class IArticleParser(ABC):
         """
         Парсит HTML-страницу и извлекает данные о статьях.
 
-        :param client: Асинхронная HTTP-сессия.
-        :param html_content: Байтовый HTML-контент страницы.
-        :return: Список словарей с данными о статьях.
+        Args:
+            client (ClientSession): Асинхронная HTTP-сессия.
+            html_content (bytes): Байтовый HTML-контент страницы.
+
+        Returns:
+            List[Dict[str, str]]: Список словарей с данными о статьях (например, заголовок, URL).
         """
         pass
 
@@ -67,6 +76,7 @@ class INewsParser(ABC):
         """
         Собирает новости.
 
-        :return: Объект NewsResponseSchema с данными о новостях.
+        Returns:
+            NewsResponseSchema: Объект с данными о новостях.
         """
         pass

@@ -1,8 +1,6 @@
 import traceback
-
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-
 from news_system.src.logger.logger_config import configure_logging
 from news_system.src.schemas.base_schemas import ErrorResponseSchema
 
@@ -11,21 +9,22 @@ logger = configure_logging(__name__)
 
 async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     """
-    Обработчик непредвиденных ошибок. Логирует подробности ошибки и возвращает
-    ответ с кодом состояния 500 (Internal Server Error) и информацией об ошибке.
+    Обработчик непредвиденных ошибок.
 
-    Параметры:
-    - request: Объект запроса FastAPI.
-    - exc: Исключение, которое было выброшено.
+    Логирует подробности ошибки и возвращает ответ с кодом состояния 500 (Internal Server Error)
+    и информацией об ошибке.
 
-    Возвращает:
-    - JSONResponse: Ответ с типом ошибки, сообщением и кодом состояния 500.
+    Args:
+        _request (Request): Объект запроса FastAPI.
+        exc (Exception): Исключение, которое было выброшено.
+
+    Returns:
+        JSONResponse: Ответ с типом ошибки, сообщением и кодом состояния 500.
     """
     error_type: str = exc.__class__.__name__
     error_message: str = str(exc)
     error_details: str = traceback.format_exc()
 
-    # Логируем исключение с подробностями
     logger.exception(
         "Произошла ошибка! Тип ошибки: %s, Сообщение: %s, Детали: %s\n\n",
         error_type,
@@ -33,7 +32,6 @@ async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
         error_details,
     )
 
-    # Формируем ответ с информацией об ошибке
     error_response = ErrorResponseSchema(
         type=error_type,
         message=error_message,

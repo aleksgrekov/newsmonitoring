@@ -1,6 +1,5 @@
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractChannel, AbstractRobustConnection
-
 from news_system.src.configs.rabbit_config import rabbit_config
 from news_system.src.logger.logger_config import configure_logging
 from news_system.src.rabbit.interfaces import IConnection
@@ -10,7 +9,11 @@ logger = configure_logging(__name__)
 
 class RabbitConnection(IConnection):
     """
-    Класс для работы с RabbitMQ: подключение, отключение и отправка сообщений.
+    Класс для управления подключением к RabbitMQ.
+
+    Attributes:
+        _connection (AbstractRobustConnection | None): Соединение с RabbitMQ.
+        _channel (AbstractChannel | None): Канал для работы с RabbitMQ.
     """
 
     def __init__(self):
@@ -19,7 +22,10 @@ class RabbitConnection(IConnection):
 
     async def connect(self) -> None:
         """
-        Подключение к RabbitMQ и создание канала.
+        Устанавливает соединение с RabbitMQ и создает канал.
+
+        Raises:
+            Exception: Если подключение не удалось.
         """
         if self._connection and not self._connection.is_closed:
             logger.info("RabbitMQ уже подключен.")
@@ -35,7 +41,7 @@ class RabbitConnection(IConnection):
 
     async def disconnect(self) -> None:
         """
-        Отключение от RabbitMQ и закрытие канала и соединения.
+        Закрывает соединение с RabbitMQ и канал.
         """
         try:
             if self._channel and not self._channel.is_closed:
@@ -51,8 +57,13 @@ class RabbitConnection(IConnection):
 
     def get_channel(self) -> AbstractChannel:
         """
-        Получение канала RabbitMQ.
-        Если канал не существует, выбрасывается исключение.
+        Возвращает активный канал RabbitMQ.
+
+        Returns:
+            AbstractChannel: Активный канал RabbitMQ.
+
+        Raises:
+            ConnectionError: Если канал не установлен или закрыт.
         """
         if not self._channel or self._channel.is_closed:
             raise ConnectionError("Канал RabbitMQ не установлен или закрыт.")
