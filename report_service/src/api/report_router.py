@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, status
 
-from report_service.src.schemas.base_schemas import SuccessResponse
 from report_service.src.repositories.report_repository import ReportRepository
+from report_service.src.schemas.base_schemas import SuccessResponse
 
 router = APIRouter(
     prefix="/report",

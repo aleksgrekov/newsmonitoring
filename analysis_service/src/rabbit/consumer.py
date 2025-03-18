@@ -1,4 +1,5 @@
 import asyncio
+
 from aio_pika import ExchangeType
 
 from analysis_service.src.logger.logger_config import configure_logging

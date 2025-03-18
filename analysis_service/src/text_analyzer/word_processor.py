@@ -1,9 +1,9 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
 import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 from textblob import TextBlob
 
 # Загружаем стоп-слова и лемматизатор

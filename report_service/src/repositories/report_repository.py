@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from database import News
-from report_service.src.logger.logger_config import configure_logging
 from report_service.src.db.service import session_factory
-from report_service.src.docx_reports.generator import ReportGenerator
 from report_service.src.docx_reports.formatter import NewsFormatter
+from report_service.src.docx_reports.generator import ReportGenerator
+from report_service.src.logger.logger_config import configure_logging
 
 logger = configure_logging(__name__)
 

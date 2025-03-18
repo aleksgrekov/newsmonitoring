@@ -1,14 +1,14 @@
-from typing import Sequence
 import asyncio
+from typing import Sequence
 
-from sqlalchemy import select, exists
+from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from analysis_service.src.logger.logger_config import configure_logging
 from database import News, Translation
-from translate_service.src.translator.translator import TranslationService
 from translate_service.src.db.service import session_factory
+from translate_service.src.translator.translator import TranslationService
 
 logger = configure_logging(__name__)
 
@@ -25,7 +25,10 @@ class TranslatorRepository:
             news_list = await cls._get_untranslated_news(session)
 
             translated_news = await asyncio.gather(
-                *(cls.translation_service.translate_news(article) for article in news_list)
+                *(
+                    cls.translation_service.translate_news(article)
+                    for article in news_list
+                )
             )
 
             translations = [

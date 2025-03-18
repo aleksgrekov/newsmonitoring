@@ -1,7 +1,6 @@
-from typing import Optional
-
 from abc import ABC
 from pathlib import Path
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

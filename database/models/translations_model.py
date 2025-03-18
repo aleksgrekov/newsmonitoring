@@ -1,9 +1,8 @@
 from typing import Optional
 
-from sqlalchemy import String, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from models.base_model import Base
+from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Translation(Base):

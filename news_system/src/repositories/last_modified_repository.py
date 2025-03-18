@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, update, exists
+from sqlalchemy import exists, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 

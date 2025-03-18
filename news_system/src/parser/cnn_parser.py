@@ -1,10 +1,10 @@
 import traceback
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import aiohttp
 from aiohttp import ClientSession
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import ValidationError, parse_obj_as
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from news_system.src.configs.parser_config import parser_settings
 from news_system.src.logger.logger_config import configure_logging
@@ -13,8 +13,8 @@ from news_system.src.parser.interfaces import (
     IHttpRequester,
     INewsParser,
 )
-from news_system.src.schemas.news_schemas import NewsResponseSchema, NewsSchema
 from news_system.src.repositories.last_modified_repository import LastModifiedRepository
+from news_system.src.schemas.news_schemas import NewsResponseSchema, NewsSchema
 
 logger = configure_logging(__name__)
 

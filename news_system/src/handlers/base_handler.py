@@ -1,6 +1,8 @@
 import traceback
+
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+
 from news_system.src.logger.logger_config import configure_logging
 from news_system.src.schemas.base_schemas import ErrorResponseSchema
 

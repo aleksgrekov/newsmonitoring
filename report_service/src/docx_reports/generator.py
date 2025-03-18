@@ -1,10 +1,10 @@
+import asyncio
 from pathlib import Path
 from typing import Sequence
-import asyncio
 
-from database import News
 from docx import Document
 
+from database import News
 from report_service.src.docx_reports.formatter import NewsFormatter
 
 

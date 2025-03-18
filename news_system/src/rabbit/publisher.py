@@ -1,5 +1,6 @@
 from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel
+
 from news_system.src.configs.rabbit_config import rabbit_config
 from news_system.src.logger.logger_config import configure_logging
 from news_system.src.rabbit.interfaces import IConnection, IMessageSender

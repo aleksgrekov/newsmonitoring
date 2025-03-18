@@ -1,15 +1,14 @@
 import asyncio
 from typing import Sequence
 
-from sqlalchemy import select, exists
+from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from analysis_service.src.logger.logger_config import configure_logging
-from database import NewsAnalysis, News
-
 from analysis_service.src.db.service import session_factory
+from analysis_service.src.logger.logger_config import configure_logging
 from analysis_service.src.text_analyzer.word_processor import analyze_text
+from database import News, NewsAnalysis
 
 logger = configure_logging(__name__)
 

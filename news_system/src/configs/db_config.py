@@ -1,4 +1,5 @@
 from typing import Optional
+
 from news_system.src.configs.base_config import Settings
 
 

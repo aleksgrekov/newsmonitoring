@@ -1,6 +1,5 @@
-from sqlalchemy.orm import Mapped
-
 from models.base_model import Base
+from sqlalchemy.orm import Mapped
 
 
 class LastModified(Base):
