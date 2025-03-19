@@ -7,6 +7,7 @@ from analysis_service.src.db.service import session_factory
 from analysis_service.src.logger.logger_config import configure_logging
 from database import News, NewsAnalysis
 from analysis_service.src.text_analyzer.analyzer_factory import AnalyzerFactory
+from analysis_service.src.text_analyzer.text_analyzer import TextAnalyzer
 
 logger = configure_logging(__name__)
 
@@ -33,7 +34,13 @@ class NewsRepository:
             await cls._save_analysis_results(session, analyzed_news)
 
     @staticmethod
-    def _get_analyzer():
+    def _get_analyzer() -> TextAnalyzer:
+        """
+        Создает экземпляр анализатора текста из фабрики.
+
+        Returns:
+             TextAnalyzer: экземпляр анализатора текста.
+        """
         return AnalyzerFactory.create_text_analyzer()
 
     @staticmethod

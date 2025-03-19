@@ -18,7 +18,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Асинхронный генератор сессии базы данных.
 
-    Используется в качестве зависимости в обработчиках FastAPI.
+    Yields:
+        AsyncSession: Асинхронная сессия базы данных.
     """
     async with session_factory() as session:
         yield session

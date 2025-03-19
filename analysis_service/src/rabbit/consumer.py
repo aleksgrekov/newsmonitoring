@@ -89,9 +89,7 @@ class WorkerService:
         Returns:
             Объявленная очередь.
         """
-        queue = await channel.declare_queue(
-            self._queue_name, durable=True, exclusive=True
-        )
+        queue = await channel.declare_queue(self._queue_name, durable=True)
         logger.info(f"Очередь {self._queue_name} успешно объявлена")
         return queue
 

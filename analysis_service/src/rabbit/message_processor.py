@@ -30,9 +30,11 @@ class MessageProcessor(IMessageProcessor):
         try:
             body = message.body.decode()
             data = json.loads(body)
-            logger.info(f"Получено сообщение: {data['message']}")
+            logger.info(
+                f"Получено сообщение: {data['message']} из очереди {message.routing_key}"
+            )
 
-            await NewsRepository.text_analysis()
+            await NewsRepository.analyze_and_save_news()
             await message.ack()
             logger.info("Анализ новостей завершен! - Analysis Service")
 

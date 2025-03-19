@@ -1,12 +1,12 @@
 from googletrans import Translator
-
+import asyncio
 from database import News
 from translate_service.src.schemas.translation_schemas import TranslatedNewsSchema
 
 
 class TranslationService:
     """
-    Сервис для перевода новостей и их заголовков.
+    Сервис для перевода заголовков и текстов новостей.
     """
 
     def __init__(self):
@@ -18,21 +18,26 @@ class TranslationService:
         """
         Переводит заголовок и текст новости на указанный язык.
 
-        :param news: Новость для перевода.
-        :param dest_language: Язык, на который нужно перевести (по умолчанию "ru" — русский).
-        :return: Словарь с переведенными заголовком и текстом.
+        Args:
+            news (News): Новость, которую нужно перевести.
+            dest_language (str): Язык перевода (по умолчанию "ru" — русский).
+
+        Returns:
+            TranslatedNewsSchema | None: Объект с переведёнными заголовком и текстом
+            или None в случае ошибки.
         """
         try:
-            translated_title = (
-                await self._translator.translate(news.title, dest=dest_language)
-            ).text
-
-            translated_content = (
-                await self._translator.translate(news.content, dest=dest_language)
-            ).text
+            translated_title = await asyncio.to_thread(
+                self._translator.translate, news.title, src="auto", dest=dest_language
+            )
+            translated_content = await asyncio.to_thread(
+                self._translator.translate, news.content, src="auto", dest=dest_language
+            )
 
             return TranslatedNewsSchema(
-                news_id=news.id, title=translated_title, content=translated_content
+                news_id=news.id,
+                title=translated_title.text,
+                content=translated_content.text,
             )
 
         except Exception as e:

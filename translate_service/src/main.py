@@ -8,12 +8,19 @@ from translate_service.src.rabbit.rabbit_connection import RabbitConnection
 
 logger = configure_logging(__name__)
 
-if __name__ == "__main__":
+
+def run_service() -> None:
     """
-    Запускает основной процесс воркер-сервиса. В случае остановки сервиса вручную
-    или из-за ошибки выводится соответствующий лог.
+    Запускает основной процесс воркер-сервиса.
+
+    Этот метод инициализирует подключение к RabbitMQ, создает обработчик сообщений,
+    настраивает воркер для получения задач и выполняет асинхронную работу. В случае
+    ошибки или остановки вручную выводится соответствующий лог.
+
     """
     try:
+        logger.info("Запуск сервиса перевода текстов...")
+
         connection = RabbitConnection(rabbit_config.url)
         processor = MessageProcessor(connection.get_channel())
         worker = WorkerService(
@@ -27,3 +34,11 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         logger.info("Сервис был остановлен вручную!")
+
+    except Exception as exc:
+        logger.exception("Критическая ошибка в работе сервиса: %s", exc)
+
+
+# Запуск основного процесса
+if __name__ == "__main__":
+    run_service()

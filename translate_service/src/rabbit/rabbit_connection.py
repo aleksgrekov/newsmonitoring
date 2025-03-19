@@ -11,6 +11,10 @@ logger = configure_logging(__name__)
 class RabbitConnection(IConnection):
     """
     Реализация для подключения к RabbitMQ и получения канала.
+
+    Attributes:
+        _url (str): URL для подключения к RabbitMQ.
+        _connection (AbstractConnection | None): Соединение с RabbitMQ.
     """
 
     def __init__(self, url: str):
@@ -19,6 +23,9 @@ class RabbitConnection(IConnection):
         self._channel: AbstractChannel | None = None
 
     async def connect(self) -> None:
+        """
+        Устанавливает соединение с RabbitMQ и создает канал.
+        """
         try:
             self._connection = await connect_robust(rabbit_config.url)
             self._channel = await self._connection.channel(publisher_confirms=False)
@@ -28,6 +35,9 @@ class RabbitConnection(IConnection):
             await self.disconnect()
 
     async def disconnect(self) -> None:
+        """
+        Закрывает соединение с RabbitMQ и канал.
+        """
         if self._channel and not self._channel.is_closed:
             await self._channel.close()
         if self._connection and not self._connection.is_closed:
@@ -38,4 +48,10 @@ class RabbitConnection(IConnection):
         logger.info("Отключение от RabbitMQ.")
 
     def get_channel(self) -> AbstractChannel | None:
+        """
+        Возвращает канал RabbitMQ.
+
+        Returns:
+            AbstractChannel | None: Канал или None, если соединение не установлено.
+        """
         return self._channel
