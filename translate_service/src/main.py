@@ -1,10 +1,10 @@
 import asyncio
 
-from translate_service.src.configs.rabbit_config import rabbit_config
-from translate_service.src.logger.logger_config import configure_logging
-from translate_service.src.rabbit.consumer import WorkerService
-from translate_service.src.rabbit.message_processor import MessageProcessor
-from translate_service.src.rabbit.rabbit_connection import RabbitConnection
+from src.configs.rabbit_config import rabbit_config
+from src.logger.logger_config import configure_logging
+from src.rabbit.consumer import WorkerService
+from src.rabbit.message_processor import MessageProcessor
+from src.rabbit.rabbit_connection import RabbitConnection
 
 logger = configure_logging(__name__)
 

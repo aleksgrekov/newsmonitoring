@@ -5,10 +5,11 @@ from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from translate_service.src.logger.logger_config import configure_logging
-from database import News, Translation
-from translate_service.src.db.service import session_factory
-from translate_service.src.translator.translator import TranslationService
+from src.db.service import session_factory
+from src.logger.logger_config import configure_logging
+from src.models.news_model import News
+from src.models.translations_model import Translation
+from src.translator.translator import TranslationService
 
 logger = configure_logging(__name__)
 

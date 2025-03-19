@@ -1,0 +1,41 @@
+# Исключить файлы и директории, не нужные в Docker-образе
+
+# Игнорируем системные файлы и временные файлы редакторов
+.DS_Store
+.mypy_cache
+.pytest_cache
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+__pycache__/
+*.log
+*.tmp
+*.toml
+poetry.lock
+*.pdf
+
+# Исключаем файлы конфигураций IDE
+.idea/
+*.iml
+
+# Исключаем артефакты сборки
+build/
+
+# Исключаем файлы Git
+.git/
+.gitignore
+
+# Исключаем файлы Docker
+Dockerfile
+docker-compose.yaml
+.dockerignore
+
+
+# Исключаем виртуальные окружения Python
+.venv/
+
+# Исключаем файлы конфигурации
+.env
+.env.template

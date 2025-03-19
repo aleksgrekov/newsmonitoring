@@ -2,9 +2,9 @@ import json
 
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
 
-from translate_service.src.logger.logger_config import configure_logging
-from translate_service.src.rabbit.interfaces import IMessageProcessor
-from translate_service.src.repositories.translator_repository import (
+from src.logger.logger_config import configure_logging
+from src.rabbit.interfaces import IMessageProcessor
+from src.repositories.translator_repository import (
     TranslatorRepository,
 )
 

@@ -1,15 +1,15 @@
-from typing import Sequence, Optional
+from typing import Optional, Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from database import News
-from report_service.src.db.service import session_factory
-from report_service.src.docx_reports.formatter import NewsFormatter
-from report_service.src.docx_reports.generator import ReportGenerator
-from report_service.src.logger.logger_config import configure_logging
-from report_service.src.schemas.report_schemas import ReportRequestBodySchema
+from src.db.service import session_factory
+from src.docx_reports.formatter import NewsFormatter
+from src.docx_reports.generator import ReportGenerator
+from src.logger.logger_config import configure_logging
+from src.models.news_model import News
+from src.schemas.report_schemas import ReportRequestBodySchema
 
 logger = configure_logging(__name__)
 

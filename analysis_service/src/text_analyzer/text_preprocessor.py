@@ -1,10 +1,10 @@
-from typing import Set, List
+from typing import List, Set
 
 from nltk import WordNetLemmatizer, word_tokenize
 from nltk.corpus import stopwords
 
-from analysis_service.src.text_analyzer.interfaces import ITextPreprocessor
-from analysis_service.src.logger.logger_config import configure_logging
+from src.logger.logger_config import configure_logging
+from src.text_analyzer.interfaces import ITextPreprocessor
 
 logger = configure_logging(__name__)
 

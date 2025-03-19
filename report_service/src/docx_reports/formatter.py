@@ -1,7 +1,7 @@
 from docx import Document
 from docx.text.paragraph import Paragraph
 
-from database import News
+from src.models.news_model import News
 
 
 class NewsFormatter:

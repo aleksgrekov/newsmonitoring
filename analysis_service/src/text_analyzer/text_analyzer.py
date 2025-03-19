@@ -1,11 +1,11 @@
 from typing import List, Tuple
 
-from analysis_service.src.text_analyzer.interfaces import (
-    ITextPreprocessor,
-    ISentimentAnalyzer,
+from src.logger.logger_config import configure_logging
+from src.text_analyzer.interfaces import (
     IKeywordExtractor,
+    ISentimentAnalyzer,
+    ITextPreprocessor,
 )
-from analysis_service.src.logger.logger_config import configure_logging
 
 logger = configure_logging(__name__)
 

@@ -2,7 +2,73 @@ version: "3.8"
 
 services:
 
-  postgres:
+  news_service:
+    build: ./news_parser
+    container_name: news_parser
+    ports:
+      - "8000:8000"
+    volumes:
+      - .env:/app/.env
+      - .database/migrations:/app/migrations
+      - .database/alembic.ini:/app/alembic.ini
+      - .database/models:/app/src/models
+    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
+    networks:
+      - app_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  analysis_service:
+    build: ./analysis_service
+    container_name: analysis_service
+    volumes:
+      - .env:/app/.env
+      - .database/models:/app/src/models
+    command: bash -c "python src.main.py"
+    networks:
+      - app_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  translate_service:
+    build: ./translate_service
+    container_name: translate_service
+    volumes:
+      - .env:/app/.env
+      - .database/models:/app/src/models
+    command: bash -c "python src.main.py"
+    networks:
+      - app_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  report_service:
+    build: ./report_service
+    container_name: report_service
+    ports:
+      - "8001:8000"
+    volumes:
+      - .env:/app/.env
+      - .database/models:/app/src/models
+    command: bash -c "uvicorn src.main:app --host 0.0.0.0 --port 8001"
+    networks:
+      - app_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  database:
     image: postgres:17.4-alpine
     container_name: news_db
     env_file:
@@ -11,14 +77,13 @@ services:
       - "5432:5432"
     volumes:
       - ./database/postgres_data:/var/lib/postgresql/data
-  #    healthcheck:
-  #      test: [ "CMD-SHELL", "pg_isready -U postgres -d news_db" ]
-  #      interval: 10s
-  #      timeout: 5s
-  #      retries: 5
-  #    networks:
-  #      - app_network
-
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -29,14 +94,15 @@ services:
       - "15672:15672"
     env_file:
       - .env
-#    networks:
-#      - app_network
-#    healthcheck:
-#      test: [ "CMD", "rabbitmqctl", "status" ]
-#      interval: 10s
-#      retries: 5
-#      start_period: 10s
-#      timeout: 5s
-#networks:
-#  app_network:
-#    driver: bridge
+    networks:
+      - app_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
+networks:
+  app_network:
+    driver: bridge

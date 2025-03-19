@@ -1,4 +1,4 @@
-from analysis_service.src.configs.base_config import Settings
+from src.configs.base_config import Settings
 
 
 class RabbitConfig(Settings):

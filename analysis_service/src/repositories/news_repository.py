@@ -1,13 +1,16 @@
 from typing import Sequence
+
 from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from analysis_service.src.db.service import session_factory
-from analysis_service.src.logger.logger_config import configure_logging
-from database import News, NewsAnalysis
-from analysis_service.src.text_analyzer.analyzer_factory import AnalyzerFactory
-from analysis_service.src.text_analyzer.text_analyzer import TextAnalyzer
+
+from src.db.service import session_factory
+from src.logger.logger_config import configure_logging
+from src.models.news_analysis_model import NewsAnalysis
+from src.models.news_model import News
+from src.text_analyzer.analyzer_factory import AnalyzerFactory
+from src.text_analyzer.text_analyzer import TextAnalyzer
 
 logger = configure_logging(__name__)
 

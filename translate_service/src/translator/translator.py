@@ -1,7 +1,9 @@
-from googletrans import Translator
 import asyncio
-from database import News
-from translate_service.src.schemas.translation_schemas import TranslatedNewsSchema
+
+from googletrans import Translator
+
+from src.models.news_model import News
+from src.schemas.translation_schemas import TranslatedNewsSchema
 
 
 class TranslationService:

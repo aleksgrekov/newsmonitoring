@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from analysis_service.src.text_analyzer.interfaces import IKeywordExtractor
-from analysis_service.src.logger.logger_config import configure_logging
+from src.logger.logger_config import configure_logging
+from src.text_analyzer.interfaces import IKeywordExtractor
 
 logger = configure_logging(__name__)
 

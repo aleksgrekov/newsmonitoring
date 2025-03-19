@@ -4,7 +4,8 @@ from src.text_analyzer.keyword_extractor import KeywordExtractor
 from src.text_analyzer.sentiment_analyzer import SentimentAnalyzer
 from src.text_analyzer.text_analyzer import TextAnalyzer
 from src.text_analyzer.text_preprocessor import TextPreprocessor
-from analysis_service.src.logger.logger_config import configure_logging
+
+from src.logger.logger_config import configure_logging
 
 logger = configure_logging(__name__)
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from news_system.src.configs.base_config import Settings
+from src.configs.base_config import Settings
 
 
 class DBSettings(Settings):

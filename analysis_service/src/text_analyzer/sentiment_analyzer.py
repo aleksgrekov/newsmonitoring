@@ -1,7 +1,7 @@
 from textblob import TextBlob
 
-from analysis_service.src.text_analyzer.interfaces import ISentimentAnalyzer
-from analysis_service.src.logger.logger_config import configure_logging
+from src.logger.logger_config import configure_logging
+from src.text_analyzer.interfaces import ISentimentAnalyzer
 
 logger = configure_logging(__name__)
 

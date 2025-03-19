@@ -1,9 +1,10 @@
 import asyncio
+
 from aio_pika import ExchangeType
 from aio_pika.abc import AbstractChannel, AbstractExchange, AbstractQueue
 
-from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.rabbit.interfaces import IConnection, IMessageProcessor
+from src.logger.logger_config import configure_logging
+from src.rabbit.interfaces import IConnection, IMessageProcessor
 
 logger = configure_logging(__name__)
 

@@ -2,9 +2,9 @@ import json
 
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
 
-from analysis_service.src.logger.logger_config import configure_logging
-from analysis_service.src.rabbit.interfaces import IMessageProcessor
-from analysis_service.src.repositories.news_repository import NewsRepository
+from src.logger.logger_config import configure_logging
+from src.rabbit.interfaces import IMessageProcessor
+from src.repositories.news_repository import NewsRepository
 
 logger = configure_logging(__name__)
 
