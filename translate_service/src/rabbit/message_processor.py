@@ -43,4 +43,4 @@ class MessageProcessor(IMessageProcessor):
 
         except Exception as e:
             logger.error(f"Ошибка при обработке сообщения: {e}")
-            await message.nack()  # Отправляем сообщение обратно в очередь
+            # await message.nack()  # Отправляем сообщение обратно в очередь

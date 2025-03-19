@@ -27,11 +27,11 @@ class TranslationService:
             или None в случае ошибки.
         """
         try:
-            translated_title = await asyncio.to_thread(
-                self._translator.translate, news.title, src="auto", dest=dest_language
+            translated_title = await self._translator.translate(
+                news.title, dest=dest_language
             )
-            translated_content = await asyncio.to_thread(
-                self._translator.translate, news.content, src="auto", dest=dest_language
+            translated_content = await self._translator.translate(
+                news.content, dest=dest_language
             )
 
             return TranslatedNewsSchema(

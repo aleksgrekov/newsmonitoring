@@ -57,10 +57,10 @@ class TranslatorRepository:
 
         Выполняет запрос в базу данных, чтобы вернуть все новости, у которых еще нет перевода.
 
-        Аргументы:
+        Args:
             session (AsyncSession): Асинхронная сессия для работы с базой данных.
 
-        Возвращает:
+        Returns:
             Sequence[News]: Список объектов News, которые еще не переведены.
         """
         stmt = select(News).where(~exists().where(Translation.news_id == News.id))
@@ -74,11 +74,8 @@ class TranslatorRepository:
 
         Обрабатывает исключения, связанные с целостностью данных, и откатывает транзакцию в случае ошибок.
 
-        Аргументы:
+        Args:
             session (AsyncSession): Асинхронная сессия для работы с базой данных.
-
-        Возвращает:
-            None
         """
         try:
             await session.commit()

@@ -38,7 +38,7 @@ async def start_news_parser(
         session (DBSession): Сессия базы данных.
 
     Returns:
-        dict[str, str]: Сообщение о успешном запуске задачи.
+        SuccessResponse: Сообщение о успешном запуске задачи.
     """
     background_tasks.add_task(NewsRepository.add_all_news_from_parser, session=session)
     return SuccessResponse(message="OK")

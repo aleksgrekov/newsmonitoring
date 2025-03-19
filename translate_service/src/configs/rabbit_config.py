@@ -13,7 +13,7 @@ class RabbitConfig(Settings):
         RABBITMQ_LOCAL_HOST_NAME (str): Хост RabbitMQ.
         RABBITMQ_LOCAL_PORT (int): Порт RabbitMQ.
 
-        ANALYSIS_QUEUE (str): Название очереди сообщений.
+        TRANSLATE_QUEUE (str): Название очереди сообщений.
         FANOUT_EXCHANGE (str): Название fanout exchange.
     """
 
@@ -22,7 +22,7 @@ class RabbitConfig(Settings):
     RABBITMQ_LOCAL_HOST_NAME: str
     RABBITMQ_LOCAL_PORT: int
 
-    ANALYSIS_QUEUE: str
+    TRANSLATE_QUEUE: str
     FANOUT_EXCHANGE: str
 
     @property
