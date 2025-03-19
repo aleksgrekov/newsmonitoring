@@ -10,6 +10,7 @@ last_modified.json
 logs/
 *.log
 *.log.*
+*.docx
 
 # Кэш и временные файлы Python
 __pycache__/

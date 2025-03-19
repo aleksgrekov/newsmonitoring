@@ -1,0 +1,45 @@
+from typing import Set, List
+
+from nltk import WordNetLemmatizer, word_tokenize
+from nltk.corpus import stopwords
+
+from analysis_service.src.text_analyzer.interfaces import ITextPreprocessor
+from analysis_service.src.logger.logger_config import configure_logging
+
+logger = configure_logging(__name__)
+
+
+class TextPreprocessor(ITextPreprocessor):
+    """Класс для предварительной обработки текста."""
+
+    def __init__(self):
+        self.stop_words: Set[str] = set(stopwords.words("english"))
+        self.lemmatizer: WordNetLemmatizer = WordNetLemmatizer()
+
+    def preprocess(self, text: str) -> str:
+        """
+        Очищает и нормализует текст.
+
+        Args:
+            text (str): Исходный текст для обработки.
+
+        Returns:
+            str: Очищенный и нормализованный текст.
+        """
+        try:
+            # Приводим текст к нижнему регистру и токенизируем
+            words: List[str] = word_tokenize(text.lower())
+
+            # Убираем знаки препинания и стоп-слова
+            words: List[str] = [
+                word for word in words if word.isalnum() and word not in self.stop_words
+            ]
+
+            # Лемматизируем слова
+            words: List[str] = [self.lemmatizer.lemmatize(word) for word in words]
+
+            # Возвращаем текст, объединенный в строку
+            return " ".join(words)
+        except Exception as e:
+            logger.error(f"Ошибка при предварительной обработке текста: {e}")
+            raise

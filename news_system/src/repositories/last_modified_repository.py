@@ -62,16 +62,17 @@ class LastModifiedRepository:
     @staticmethod
     async def _record_exists(session: AsyncSession) -> bool:
         """
-        Проверяет, существует ли запись с id=1.
+        Проверяет, есть ли хоть одна запись в таблице LastModified.
 
         Args:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
 
         Returns:
-            bool: True, если запись существует, иначе False.
+            bool: True, если в таблице есть хотя бы одна запись, иначе False.
         """
-        result = await session.execute(select(exists().where(LastModified.id == 1)))
-        return result.scalar()
+        stmt = select(exists().where(LastModified.id.isnot(None)))
+        result = await session.execute(stmt)
+        return result.scalar() or False
 
     @staticmethod
     async def _update_record(session: AsyncSession, value: str) -> None:
@@ -82,9 +83,7 @@ class LastModifiedRepository:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
             value (str): Новое значение заголовка.
         """
-        await session.execute(
-            update(LastModified).values(last_modified=value).where(LastModified.id == 1)
-        )
+        await session.execute(update(LastModified).values(last_modified=value))
 
     @staticmethod
     async def _create_record(session: AsyncSession, value: str) -> None:
@@ -95,7 +94,7 @@ class LastModifiedRepository:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
             value (str): Значение заголовка.
         """
-        new_record = LastModified(id=1, last_modified=value)
+        new_record = LastModified(last_modified=value)
         session.add(new_record)
 
     @staticmethod

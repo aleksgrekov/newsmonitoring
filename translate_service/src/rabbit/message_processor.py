@@ -22,6 +22,7 @@ class MessageProcessor(IMessageProcessor):
             data = json.loads(body)
             logger.info(f"{data["message"]}")
             await TranslatorRepository.translate()
+
             await message.ack()
             logger.info(f"Анализ новостей окончен! - Translate Service")
 

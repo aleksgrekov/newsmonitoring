@@ -1,18 +1,17 @@
 import logging
 
 
-def configure_logging(
-    name: str,
-    level: int = logging.INFO,
-) -> logging.Logger:
+def configure_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     """
-    Настройка логирования.
+    Настраивает и возвращает логгер с указанным именем и уровнем логирования.
 
-    :param name: Имя логгера.
-    :param level: Уровень логирования (по умолчанию INFO).
-    :return: Настроенный логгер.
+    Args:
+        name (str): Имя логгера.
+        level (int, optional): Уровень логирования. По умолчанию `logging.INFO`.
+
+    Returns:
+        logging.Logger: Настроенный логгер.
     """
-
     # Формат логирования
     log_format = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"
 

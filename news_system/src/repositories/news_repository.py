@@ -41,11 +41,11 @@ class NewsRepository:
         start_count = await cls._get_news_count(session)
 
         await cls._insert_news(session, news)
-        await cls._secure_commit(session)
 
         end_count = await cls._get_news_count(session)
         added_news_count = end_count - start_count
 
+        await cls._secure_commit(session)
         logger.info(f"В базу добавлено {added_news_count} новостей!")
         message = SuccessResponse(message=news_data.header)
         await publisher.send_messages(message.model_dump_json())
