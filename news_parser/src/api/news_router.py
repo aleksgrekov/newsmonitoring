@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, status
 from src.db.service import DBSession
-from src.repositories.news_analyzer_repository import NewsRepository
+from src.repositories.news_repository import NewsRepository
 from src.schemas.base_schemas import SuccessResponse
 
 router = APIRouter(

@@ -1,14 +1,14 @@
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import Sequence
 
 from docx import Document
+from docx.document import Document as DocumentType
+
 from src.docx_reports.formatter import NewsFormatter
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
 
-if TYPE_CHECKING:
-    from docx.document import Document as DocumentType
 
 logger = configure_logging(__name__)
 
@@ -70,6 +70,7 @@ class ReportGenerator:
     def _add_news_to_document(self, doc: DocumentType, news: News) -> None:
         """Добавляет новость в документ."""
         doc.add_heading(news.title, level=2)
+        doc.add_paragraph(news.content)
 
         doc.add_paragraph()
 

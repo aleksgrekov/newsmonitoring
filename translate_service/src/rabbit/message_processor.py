@@ -34,7 +34,7 @@ class MessageProcessor(IMessageProcessor):
 
             await TranslatorRepository.translate()
             await message.ack()
-            logger.info("Анализ новостей окончен! - Translate Service")
+            logger.info("Перевод новостей окончен! - Translate Service")
 
         except Exception as exc:
             logger.error("Ошибка при обработке сообщения: %s", exc)

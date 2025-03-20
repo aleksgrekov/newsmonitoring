@@ -1,10 +1,7 @@
-from typing import TYPE_CHECKING
-
 from docx.text.paragraph import Paragraph
-from src.models.news_model import News
+from docx.document import Document as DocumentType
 
-if TYPE_CHECKING:
-    from docx.document import Document as DocumentType
+from src.models.news_model import News
 
 
 class NewsFormatter:
@@ -27,7 +24,7 @@ class NewsFormatter:
 
             if translation.content:
                 paragraph = doc.add_paragraph()
-                self.add_bold_run(paragraph, "Перевод: ")
+                # self.add_bold_run(paragraph, "Перевод: ")
                 paragraph.add_run(translation.content)
 
     def format_analysis(self, news: News, doc: DocumentType) -> None:
