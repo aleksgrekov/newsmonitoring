@@ -25,8 +25,11 @@ __pycache__/
 *.swo
 
 # Базы данных
-postgres_data/
+/postgres_data/
 
 # Виртуальное окружение для разработки
 poetry.lock
 pyproject.toml
+
+# Отчеты по новостям
+/reports/
