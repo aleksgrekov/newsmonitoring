@@ -16,3 +16,28 @@ class SuccessResponse(BaseModel):
         title="Сообщение об успехе",
         description="Сообщение, подтверждающее успешное выполнение операции.",
     )
+
+
+class ErrorResponseSchema(BaseModel):
+    """
+    Схема для ответа API об ошибке.
+
+    Используется для отправки информации о возникшей ошибке.
+
+    Attributes:
+        type (str): Тип ошибки, например,
+        'ValidationError' или 'InternalServerError'.
+        message (str): Сообщение, содержащее подробности об ошибке.
+    """
+
+    type: str = Field(
+        ...,
+        title="Тип ошибки",
+        description="Тип ошибки, например, "
+        "'ValidationError' или 'InternalServerError'.",
+    )
+    message: str = Field(
+        ...,
+        title="Сообщение об ошибке",
+        description="Сообщение, содержащее подробности об ошибке.",
+    )

@@ -6,4 +6,4 @@ base_router = APIRouter(
     tags=["API"],
 )
 
-base_router.include_router(report_router)
+base_router.include_router(report_router, prefix="/report")

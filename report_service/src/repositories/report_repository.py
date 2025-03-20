@@ -7,6 +7,7 @@ from src.db.service import session_factory
 from src.docx_reports.email_sender import EmailSender
 from src.docx_reports.formatter import NewsFormatter
 from src.docx_reports.generator import ReportGenerator
+from src.handlers.custom_exceptions import BaseCustomException
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
 from src.schemas.report_schemas import EmailSchema
@@ -55,9 +56,10 @@ class ReportRepository:
                 rep_path = await cls.report_generator.create_report(news_data)
                 logger.info("Отчет сформирован и сохранен в %s", rep_path)
 
-        except Exception as e:
-            logger.error("Ошибка при генерации отчета: %s", e, exc_info=True)
-            return None
+        except Exception as exc:
+            message = ("Ошибка при генерации отчета: %s", exc)
+            logger.error(message, exc_info=True)
+            raise BaseCustomException(message)
 
     @classmethod
     async def send_report_by_email(cls, email: str) -> None:
@@ -72,11 +74,12 @@ class ReportRepository:
             await cls.email_sender.send_report_by_email(email)
             logger.info("Отчет успешно отправлен на email: %s", email)
         except Exception as exc:
-            logger.error(
+            message = (
                 "Ошибка при отправке отчета на email: %s",
                 exc,
-                exc_info=True,
             )
+            logger.error(message, exc_info=True)
+            raise BaseCustomException()
 
     @staticmethod
     async def _fetch_news_data(session: AsyncSession) -> Sequence["News"]:

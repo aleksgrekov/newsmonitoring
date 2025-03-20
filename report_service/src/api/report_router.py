@@ -4,7 +4,6 @@ from src.schemas.base_schemas import SuccessResponse
 from src.schemas.report_schemas import EmailSchema
 
 router = APIRouter(
-    prefix="/report",
     tags=["Report"],
 )
 
