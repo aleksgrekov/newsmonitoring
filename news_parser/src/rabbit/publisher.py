@@ -1,5 +1,5 @@
 from aio_pika import ExchangeType, Message
-from aio_pika.abc import AbstractChannel
+from aio_pika.abc import AbstractChannel, AbstractExchange
 from src.configs.rabbit_config import rabbit_config
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection, IMessageSender
@@ -13,13 +13,20 @@ class Publisher(IMessageSender):
     Класс для отправки сообщений в RabbitMQ.
 
     Attributes:
-        _connection (IConnection): Подключение к RabbitMQ.
-        _channel (AbstractChannel | None): Канал для работы с RabbitMQ.
-        _exchange (ExchangeType | None): Обменник RabbitMQ для отправки сообщений.
+        _connection (IConnection):
+        Подключение к RabbitMQ.
+
+        _channel (AbstractChannel | None):
+        Канал для работы с RabbitMQ.
+
+        _exchange (ExchangeType | None):
+        Обменник RabbitMQ для отправки сообщений.
     """
 
     def __init__(
-        self, conn: IConnection, exchange_name: str = rabbit_config.FANOUT_EXCHANGE
+        self,
+        conn: IConnection,
+        exchange_name: str = rabbit_config.FANOUT_EXCHANGE,
     ):
         """
         Инициализация Publisher с созданием канала и обменника.
@@ -29,8 +36,8 @@ class Publisher(IMessageSender):
             exchange_name (str): Имя обменника для отправки сообщений.
         """
         self._connection = conn
-        self._channel = None
-        self._exchange = None
+        self._channel: AbstractChannel | None = None
+        self._exchange: AbstractExchange | None = None
         self._exchange_name = exchange_name
 
     async def _ensure_channel(self) -> AbstractChannel:
@@ -78,11 +85,21 @@ class Publisher(IMessageSender):
         try:
             await self._ensure_exchange()
             if not self._exchange:
-                logger.error("Невозможно отправить сообщение. Обменник отсутствует.")
+                logger.error(
+                    "Невозможно отправить сообщение. %s",
+                    "Обменник отсутствует.",
+                )
                 return
 
-            await self._exchange.publish(Message(body=message.encode()), routing_key="")
-            logger.info("Отправлено сообщение в Exchange: %s", self._exchange_name)
+            await self._exchange.publish(
+                Message(body=message.encode()),
+                routing_key="",
+            )
+
+            logger.info(
+                "Отправлено сообщение в Exchange: %s",
+                self._exchange_name,
+            )
 
         except Exception as e:
             logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)

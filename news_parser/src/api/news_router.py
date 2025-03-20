@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, status
 from src.db.service import DBSession
-from src.repositories.news_repository import NewsRepository
+from src.repositories.news_analyzer_repository import NewsRepository
 from src.schemas.base_schemas import SuccessResponse
 
 router = APIRouter(
@@ -13,7 +13,8 @@ router = APIRouter(
     "/",
     summary="Запуск парсера новостей",
     description="""
-    Запускает фоновую задачу для парсинга новостей и сохранения их в базу данных.
+    Запускает фоновую задачу для парсинга новостей
+    и сохранения их в базу данных.
     """,
     response_description="Сообщение о успешном запуске задачи",
     response_model=SuccessResponse,
@@ -39,5 +40,6 @@ async def start_news_parser(
     Returns:
         SuccessResponse: Сообщение о успешном запуске задачи.
     """
-    background_tasks.add_task(NewsRepository.add_all_news_from_parser, session=session)
+    task = NewsRepository.add_all_news_from_parser
+    background_tasks.add_task(task, session=session)
     return SuccessResponse(message="OK")

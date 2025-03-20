@@ -13,13 +13,16 @@ class AnalyzerFactory:
     """Фабрика для создания экземпляров TextAnalyzer и его зависимостей."""
 
     @staticmethod
-    def create_text_analyzer(max_keywords: Optional[int] = None) -> TextAnalyzer:
+    def create_text_analyzer(
+        max_keywords: Optional[int] = None,
+    ) -> TextAnalyzer:
         """
         Создает экземпляр TextAnalyzer с настраиваемыми параметрами.
 
         Args:
-            max_keywords (Optional[int]): Максимальное количество ключевых слов.
-                                          Если не указано, используется значение по умолчанию.
+            max_keywords (Optional[int]):
+            Максимальное количество ключевых слов.
+            Если не указано, используется значение по умолчанию.
 
         Returns:
             TextAnalyzer: Экземпляр TextAnalyzer.

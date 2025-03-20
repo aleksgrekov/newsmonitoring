@@ -1,9 +1,9 @@
 import asyncio
 from asyncio import Semaphore
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from dateutil import parser as date_parser
 from fake_useragent import UserAgent
 from src.configs.parser_config import parser_settings
@@ -21,7 +21,7 @@ class ArticleParser(IArticleParser):
 
     async def parse_page(
         self, client: ClientSession, html_content: bytes
-    ) -> List[Dict[str, str]]:
+    ) -> List[Dict[str, Optional[str]]]:
         """
         Парсит HTML-страницу и извлекает данные о статьях.
 
@@ -30,7 +30,8 @@ class ArticleParser(IArticleParser):
             html_content (bytes): Байтовый HTML-контент страницы.
 
         Returns:
-            List[Dict[str, str]]: Список словарей с данными о статьях.
+            List[Dict[str, Optional[str]]]: Список словарей
+            с данными о статьях.
         """
         try:
             containers = self.__extract_containers(html_content)
@@ -41,7 +42,7 @@ class ArticleParser(IArticleParser):
             return []
 
     @staticmethod
-    def __extract_containers(html_content: bytes) -> List[Any]:
+    def __extract_containers(html_content: bytes) -> List[Tag]:
         """
         Извлекает контейнеры статей из HTML-контента.
 
@@ -49,74 +50,86 @@ class ArticleParser(IArticleParser):
             html_content (bytes): Байтовый HTML-контент страницы.
 
         Returns:
-            List[Any]: Список контейнеров статей.
+            List[Tag]: Список контейнеров статей.
         """
         soup = BeautifulSoup(html_content, "lxml")
         return soup.select("div.card.container__item")
 
     async def __parse_containers(
-        self, containers: List[Any], client: ClientSession
-    ) -> List[Dict[str, str]]:
+        self, containers: List[Tag], client: ClientSession
+    ) -> List[Dict[str, Optional[str]]]:
         """
         Парсит каждый контейнер асинхронно.
 
         Args:
-            containers (List[Any]): Список контейнеров статей.
+            containers (List[Tag]): Список контейнеров статей.
             client (ClientSession): Асинхронная HTTP-сессия.
 
         Returns:
-            List[Dict[str, str]]: Список словарей с результатами парсинга.
+            List[Dict[str, Optional[str]]]: Список словарей
+            с результатами парсинга.
         """
-
         tasks = (
             self.__parse_cnn_container(container, client)
             for container in containers
             if container
         )
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        return [
-            result for result in results if isinstance(result, dict) and bool(result)
-        ]
+        return [res for res in results if isinstance(res, dict) and bool(res)]
 
     @staticmethod
     def __filter_valid_results(
-        results: List[Union[BaseException, Dict[str, str]]],
-    ) -> List[Dict[str, str]]:
+        results: List[Dict[str, Optional[str]]],
+    ) -> List[Dict[str, Optional[str]]]:
         """
         Фильтрует валидные результаты парсинга.
 
         Args:
-            results (List[Union[BaseException, Dict[str, str]]]): Список результатов или исключений.
+            results (List[Dict[str, Optional[str]]]): Список результатов.
 
         Returns:
-            List[Dict[str, str]]: Список валидных результатов.
+            List[Dict[str, Optional[str]]]: Список валидных результатов.
         """
-        return [result for result in results if isinstance(result, dict) and result]
+        return [res for res in results if isinstance(res, dict) and res]
 
     async def __parse_cnn_container(
-        self, container: Any, client: ClientSession
-    ) -> Dict[str, str]:
+        self, container: Tag, client: ClientSession
+    ) -> Dict[str, Optional[str]]:
         """
         Парсит отдельный контейнер статьи.
 
         Args:
-            container (Any): HTML-контейнер статьи.
+            container (Tag): HTML-контейнер статьи.
             client (ClientSession): Асинхронная HTTP-сессия.
 
         Returns:
-            Dict[str, str]: Словарь с данными о статье.
+            Dict[str, Optional[str]]: Словарь с данными о статье.
         """
         try:
-            headline_tag = container.find("span", class_="container__headline-text")
-            title = headline_tag.text.strip() if headline_tag else "No title"
+            headline_tag = container.find(
+                "span",
+                class_="container__headline-text",
+            )
+            if headline_tag:
+                title = headline_tag.text.strip()
+            else:
+                title = "No title"
 
             link_tag = container.find("a", href=True)
-            link = link_tag["href"] if link_tag else "#"
-            if not link.startswith("http"):
-                link = "https://www.cnn.com{link}".format(link=link)
 
-            article_data = await self.__parse_article_page(client, link)
-            return {"title": title, "url": link, **article_data}
+            if isinstance(link_tag, Tag):
+                link = str(link_tag.get("href", "#"))
+            else:
+                link = "#"
+
+            link = (
+                f"https://www.cnn.com{link}"
+                if link and not link.startswith("http")
+                else link
+            )
+
+            article_data = await self.__parse_article_page(client, link or "#")
+            return {"title": title or "", "url": link or "", **article_data}
         except Exception as exc:
             logger.error("Ошибка при парсинге контейнера:\n%s", exc)
             return {}
@@ -132,7 +145,8 @@ class ArticleParser(IArticleParser):
             url (str): URL статьи.
 
         Returns:
-            Dict[str, Optional[str]]: Словарь с текстом статьи и датой публикации.
+            Dict[str, Optional[str]]: Словарь
+            с текстом статьи и датой публикации.
         """
         wait_time = 1
         while True:
@@ -142,7 +156,8 @@ class ArticleParser(IArticleParser):
                 ) as response:
                     if response.status == 429:
                         logger.info(
-                            "Получен код 429. Ожидание %s секунд перед повторным запросом...",
+                            "Получен код 429. "
+                            "Ожидание %s секунд перед повторным запросом...",
                             wait_time,
                         )
                         await asyncio.sleep(wait_time)
@@ -152,30 +167,52 @@ class ArticleParser(IArticleParser):
                     html_content = await response.text()
                     soup = BeautifulSoup(html_content, "lxml")
 
-                    content_container = soup.find("div", class_="article__content")
+                    content_container = soup.find(
+                        "div",
+                        class_="article__content",
+                    )
+
                     paragraphs = (
-                        content_container.find_all("p") if content_container else []
+                        content_container.find_all("p")
+                        if content_container
+                        and isinstance(
+                            content_container,
+                            Tag,
+                        )
+                        else []
                     )
                     full_text = " ".join(p.text.strip() for p in paragraphs)
 
-                    date_tag = soup.find("div", class_="timestamp vossi-timestamp")
-                    raw_date = date_tag.text.strip() if date_tag else ""
-                    raw_date = (
-                        raw_date.replace("Updated", "").replace("Published", "").strip()
+                    date_tag = soup.find(
+                        "div",
+                        class_="timestamp vossi-timestamp",
                     )
+                    raw_date = date_tag.text.strip() if date_tag else ""
+
+                    updated_date = raw_date.replace("Updated", "")
+                    published_date = updated_date.replace("Published", "")
+                    raw_date = published_date.strip()
 
                     try:
                         pub_date = (
-                            date_parser.parse(raw_date, ignoretz=True)
+                            date_parser.parse(
+                                raw_date,
+                                ignoretz=True,
+                            ).isoformat()
                             if raw_date
                             else None
                         )
                     except ValueError as exc:
                         logger.error("Ошибка при парсинге даты: %s", exc)
+                        pub_date = None
 
                     return {"content": full_text, "pub_date": pub_date}
             except ClientResponseError as exc:
-                logger.error("Ошибка при парсинге страницы новости %s\n%s", url, exc)
+                logger.error(
+                    "Ошибка при парсинге страницы новости %s\n%s",
+                    url,
+                    exc,
+                )
                 return {"content": "", "pub_date": None}
 
     @property
@@ -189,12 +226,12 @@ class ArticleParser(IArticleParser):
         return UserAgent().random
 
     @property
-    def __headers(self) -> Dict[str, Union[str, Any]]:
+    def __headers(self) -> Dict[str, str]:
         """
         Возвращает заголовки для HTTP-запросов.
 
         Returns:
-            Dict[str, Union[str, Any]]: Словарь с заголовками.
+            Dict[str, str]: Словарь с заголовками.
         """
         return {
             "Accept": parser_settings.ACCEPT,

@@ -26,12 +26,17 @@ class TextAnalyzer:
         Инициализирует экземпляр TextAnalyzer.
 
         Args:
-            text_preprocessor (ITextPreprocessor): Класс для предварительной обработки текста.
-            sentiment_analysis_tool (ISentimentAnalyzer): Класс для анализа тональности.
-            keyword_extraction_tool (IKeywordExtractor): Класс для извлечения ключевых слов.
+            text_preprocessor (ITextPreprocessor):
+            Класс для предварительной обработки текста.
+
+            sentiment_analysis_tool (ISentimentAnalyzer):
+            Класс для анализа тональности.
+
+            keyword_extraction_tool (IKeywordExtractor):
+            Класс для извлечения ключевых слов.
         """
         self.preprocessor = text_preprocessor
-        self.sentiment_analyzer = sentiment_analysis_tool
+        self.analyzer = sentiment_analysis_tool
         self.keyword_extractor = keyword_extraction_tool
 
     def analyze(self, text: str) -> Tuple[float, List[str]]:
@@ -42,15 +47,16 @@ class TextAnalyzer:
             text (str): Исходный текст для анализа.
 
         Returns:
-            Tuple[float, List[str]]: Кортеж, содержащий тональность текста (от -1 до 1)
-                                     и список ключевых слов.
+            Tuple[float, List[str]]: Кортеж, содержащий тональность текста
+            (от -1 до 1)
+            и список ключевых слов.
         """
         try:
             # Предварительная обработка текста
             processed_text: str = self.preprocessor.preprocess(text)
 
             # Анализ тональности
-            sentiment: float = self.sentiment_analyzer.analyze_sentiment(processed_text)
+            sentiment: float = self.analyzer.analyze_sentiment(processed_text)
 
             # Извлечение ключевых слов
             keywords: List[str] = self.keyword_extractor.extract_keywords(

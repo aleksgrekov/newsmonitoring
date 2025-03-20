@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -11,8 +13,9 @@ class SuccessResponse(BaseModel):
         message (str): Сообщение, подтверждающее успешное выполнение операции.
     """
 
-    message: str = Field(
-        ...,
+    message: Optional[str] = Field(
+        default="ПРЕДУПРЕЖЖДЕНИЕ!!!\n'x-last-modified': "
+        "не удалось установить значение хедера!",
         title="Сообщение об успехе",
         description="Сообщение, подтверждающее успешное выполнение операции.",
     )
@@ -25,14 +28,16 @@ class ErrorResponseSchema(BaseModel):
     Используется для отправки информации о возникшей ошибке.
 
     Attributes:
-        type (str): Тип ошибки, например, 'ValidationError' или 'InternalServerError'.
+        type (str): Тип ошибки, например,
+        'ValidationError' или 'InternalServerError'.
         message (str): Сообщение, содержащее подробности об ошибке.
     """
 
     type: str = Field(
         ...,
         title="Тип ошибки",
-        description="Тип ошибки, например, 'ValidationError' или 'InternalServerError'.",
+        description="Тип ошибки, например, "
+        "'ValidationError' или 'InternalServerError'.",
     )
     message: str = Field(
         ...,

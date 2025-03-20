@@ -7,12 +7,16 @@ def configure_logging(name: str, level: int = logging.INFO) -> logging.Logger:
 
     Args:
         name (str): Имя логгера.
-        level (int, optional): Уровень логирования. По умолчанию `logging.INFO`.
+        level (int, optional):
+        Уровень логирования. По умолчанию `logging.INFO`.
 
     Returns:
         logging.Logger: Настроенный логгер.
     """
-    log_format = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"
+    log_format = (
+        "[%(asctime)s.%(msecs)03d] %(funcName)20s "
+        "%(module)s:%(lineno)d %(levelname)-8s - %(message)s"
+    )
 
     logging.basicConfig(
         level=level,

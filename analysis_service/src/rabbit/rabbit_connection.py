@@ -27,10 +27,15 @@ class RabbitConnection(IConnection):
         """
         try:
             self._connection = await connect_robust(self._url)
-            self._channel = await self._connection.channel(publisher_confirms=False)
+            self._channel = await self._connection.channel(
+                publisher_confirms=False,
+            )
             logger.info("Подключение к RabbitMQ. - Успех.")
-        except Exception as e:
-            logger.exception("При подключении к RabbitMQ произошла ошибка: %s", e)
+        except Exception as exc:
+            logger.exception(
+                "При подключении к RabbitMQ произошла ошибка: %s",
+                exc,
+            )
             await self.disconnect()
 
     async def disconnect(self) -> None:
@@ -51,6 +56,7 @@ class RabbitConnection(IConnection):
         Возвращает канал RabbitMQ.
 
         Returns:
-            AbstractChannel | None: Канал или None, если соединение не установлено.
+            AbstractChannel | None:
+            Канал или None, если соединение не установлено.
         """
         return self._channel

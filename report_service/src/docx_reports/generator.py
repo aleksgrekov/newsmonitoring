@@ -1,11 +1,14 @@
 import asyncio
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 from docx import Document
 from src.docx_reports.formatter import NewsFormatter
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
+
+if TYPE_CHECKING:
+    from docx.document import Document as DocumentType
 
 logger = configure_logging(__name__)
 
@@ -26,18 +29,27 @@ class ReportGenerator:
         Returns:
             Путь к сохраненному файлу.
         """
-        report_folder = Path(__file__).resolve().parent.parent.parent / "reports"
+        report_folder = (
+            Path(
+                __file__,
+            )
+            .resolve()
+            .parent.parent.parent
+            / "reports"
+        )
         report_folder.mkdir(parents=True, exist_ok=True)
 
-        path_for_save = report_folder / "news_report.docx"
+        path_for_save = str(report_folder / "news_report.docx")
 
         doc = self._generate_report(news_data)
 
-        await asyncio.to_thread(doc.save, path_for_save)
+        await asyncio.to_thread(
+            doc.save, path_for_save
+        )  # Метод save теперь распознается
 
         return str(path_for_save)
 
-    def _generate_report(self, news_data: Sequence[News]) -> Document:
+    def _generate_report(self, news_data: Sequence[News]) -> DocumentType:
         """Создает отчет по переданным новостям."""
         doc = self._create_document()
 
@@ -47,13 +59,15 @@ class ReportGenerator:
         return doc
 
     @staticmethod
-    def _create_document() -> Document:
+    def _create_document() -> DocumentType:
         """Создает новый документ с заголовком отчета."""
         doc = Document()
-        doc.add_heading("Отчет по новостям", level=1)
+        doc.add_heading(
+            "Отчет по новостям", level=1
+        )  # Метод add_heading теперь распознается
         return doc
 
-    def _add_news_to_document(self, doc: Document, news: News) -> None:
+    def _add_news_to_document(self, doc: DocumentType, news: News) -> None:
         """Добавляет новость в документ."""
         doc.add_heading(news.title, level=2)
 
@@ -69,7 +83,9 @@ class ReportGenerator:
         self.formatter.format_translation(news, doc)
 
         if news.content:
-            doc.add_paragraph(str(news.content))
+            doc.add_paragraph(
+                str(news.content)
+            )  # Метод add_paragraph теперь распознается
 
         self.formatter.format_analysis(news, doc)
-        doc.add_paragraph("—" * 50)
+        doc.add_paragraph("—" * 50)  # Метод add_paragraph теперь распознается

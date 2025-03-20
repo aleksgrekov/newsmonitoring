@@ -19,10 +19,12 @@ class IHttpRequester(ABC):
 
         Args:
             client (ClientSession): Асинхронная HTTP-сессия.
-            last_modified (Optional[str]): Последнее значение заголовка Last-Modified.
+            last_modified (Optional[str]):
+            Последнее значение заголовка Last-Modified.
 
         Returns:
-            Optional[str]: Новое значение заголовка Last-Modified, если контент изменился, иначе None.
+            Optional[str]: Новое значение заголовка Last-Modified,
+            если контент изменился, иначе None.
         """
         pass
 
@@ -34,8 +36,11 @@ class IHttpRequester(ABC):
         Отправляет GET-запрос для получения HTML-контента.
 
         Args:
-            client (ClientSession): Асинхронная HTTP-сессия.
-            modified_header (Optional[str]): Заголовок Last-Modified, если он есть.
+            client (ClientSession):
+            Асинхронная HTTP-сессия.
+
+            modified_header (Optional[str]):
+            Заголовок Last-Modified, если он есть.
 
         Returns:
             Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
@@ -60,7 +65,8 @@ class IArticleParser(ABC):
             html_content (bytes): Байтовый HTML-контент страницы.
 
         Returns:
-            List[Dict[str, str]]: Список словарей с данными о статьях (например, заголовок, URL).
+            List[Dict[str, str]]:
+            Список словарей с данными о статьях (например, заголовок, URL).
         """
         pass
 

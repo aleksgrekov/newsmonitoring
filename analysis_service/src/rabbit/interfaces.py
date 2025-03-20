@@ -33,7 +33,8 @@ class IConnection(ABC):
         Возвращает канал для работы с брокером сообщений.
 
         Returns:
-            AbstractChannel | None: Канал или None, если соединение не установлено.
+            AbstractChannel | None:
+            Канал или None, если соединение не установлено.
         """
         pass
 

@@ -13,12 +13,14 @@ from src.text_analyzer.text_analyzer import TextAnalyzer
 logger = configure_logging(__name__)
 
 
-class NewsRepository:
+class NewsAnalyzerRepository:
     """Репозиторий для работы с новостями и их анализом в базе данных."""
 
     @classmethod
     async def analyze_and_save_news(cls) -> None:
-        """Анализирует все новые новости и сохраняет результаты в базе данных."""
+        """
+        Анализирует все новые новости и сохраняет результаты в базе данных.
+        """
         async with session_factory() as session:
             news_list = await cls._get_unanalyzed_news(session)
             analyzer = cls._get_analyzer()
@@ -29,7 +31,11 @@ class NewsRepository:
                     news_id=news_item.id,
                 )
                 for news_item in news_list
-                if (result := analyzer.analyze(news_item.content or news_item.title))
+                if (
+                    result := analyzer.analyze(
+                        news_item.content or news_item.title,
+                    )
+                )
             ]
 
             await cls._save_analysis_results(session, analyzed_news)
@@ -56,7 +62,11 @@ class NewsRepository:
             Sequence[News]: Список необработанных новостей.
         """
         logger.info("Запрос необработанных новостей из базы данных.")
-        stmt = select(News).where(~exists().where(NewsAnalysis.news_id == News.id))
+
+        select_query = select(News)
+        where_query = ~exists().where(NewsAnalysis.news_id == News.id)
+        stmt = select_query.where(where_query)
+
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -69,16 +79,22 @@ class NewsRepository:
 
         Args:
             session (AsyncSession): Сессия базы данных.
-            analyzed_news (list[NewsAnalysis]): Список проанализированных новостей.
+
+            analyzed_news (list[NewsAnalysis]):
+            Список проанализированных новостей.
 
         Raises:
-            IntegrityError: Если возникает ошибка целостности данных при коммите.
+            IntegrityError:
+            Если возникает ошибка целостности данных при коммите.
         """
         if not analyzed_news:
-            logger.info("Нет данных для сохранения в таблицу анализа новостей.")
+            logger.info("Нет данных для сохранения в таблицу.")
             return
 
-        logger.info("Сохранение %d записей анализа в базу данных.", len(analyzed_news))
+        logger.info(
+            "Сохранение %d записей анализа в базу данных.",
+            len(analyzed_news),
+        )
         session.add_all(analyzed_news)
         await cls._secure_commit(session)
 

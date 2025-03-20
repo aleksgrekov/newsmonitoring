@@ -17,7 +17,8 @@ class NewsRepository:
     Репозиторий для работы с новостями.
 
     Методы:
-        - add_all_news_from_parser: Добавляет новости, полученные от парсера, в базу данных.
+        - add_all_news_from_parser: Добавляет новости,
+        полученные от парсера, в базу данных.
         - _secure_commit: Безопасно выполняет commit.
     """
 
@@ -61,7 +62,8 @@ class NewsRepository:
             int: Количество новостей.
         """
         result = await session.execute(func.count(News.id))
-        return result.scalar()
+        count = result.scalar()
+        return count if count is not None else 0
 
     @staticmethod
     async def _insert_news(session: AsyncSession, news: list) -> None:
@@ -85,7 +87,8 @@ class NewsRepository:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
 
         Raises:
-            IntegrityViolationException: Если возникает ошибка целостности данных.
+            IntegrityViolationException:
+            Если возникает ошибка целостности данных.
         """
         try:
             await session.commit()

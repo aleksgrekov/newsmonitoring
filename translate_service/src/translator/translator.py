@@ -25,7 +25,8 @@ class TranslationService:
             dest_language (str): Язык перевода (по умолчанию "ru" — русский).
 
         Returns:
-            TranslatedNewsSchema | None: Объект с переведёнными заголовком и текстом
+            TranslatedNewsSchema | None:
+            Объект с переведёнными заголовком и текстом
             или None в случае ошибки.
         """
         try:
@@ -43,5 +44,9 @@ class TranslationService:
             )
 
         except Exception as exc:
-            logger.error("Ошибка при переводе новости с ID %s: %s", news.id, exc)
+            logger.error(
+                "Ошибка при переводе новости с ID %s: %s",
+                news.id,
+                exc,
+            )
             return None

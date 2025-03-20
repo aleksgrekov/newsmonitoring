@@ -49,7 +49,10 @@ class HttpRequester(IHttpRequester):
             Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
         if not modified_header:
-            logger.error("Значение заголовка 'x-last-modified': %s", modified_header)
+            logger.error(
+                "Значение заголовка 'x-last-modified': %s",
+                modified_header,
+            )
             return None
 
         try:
@@ -75,7 +78,9 @@ class HttpRequester(IHttpRequester):
                 return await response.read()
             else:
                 logger.error(
-                    "Ошибка при запросе к %s.\nСтатус %s", self.__url, response.status
+                    "Ошибка при запросе к %s.\nСтатус %s",
+                    self.__url,
+                    response.status,
                 )
                 return None
 
@@ -87,12 +92,18 @@ class HttpRequester(IHttpRequester):
 
         Args:
             client (ClientSession): Асинхронная HTTP-сессия.
-            last_modified (Optional[str]): Последнее значение заголовка Last-Modified.
+
+            last_modified (Optional[str]):
+            Последнее значение заголовка Last-Modified.
 
         Returns:
-            Optional[str]: Новое значение заголовка Last-Modified или None, если контент не изменился.
+            Optional[str]: Новое значение заголовка Last-Modified или None,
+            если контент не изменился.
         """
-        async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
+        async with client.head(
+            self.__url,
+            timeout=ClientTimeout(15),
+        ) as response:
             if response.status != 200:
                 logger.error(
                     "Не удалось получить заголовки для %s.\nСтатус: %s",

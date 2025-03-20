@@ -18,7 +18,8 @@ class ReportRepository:
     """
     Репозиторий для генерации отчетов и отправки их по email.
 
-    Содержит методы для создания отчетов на основе данных новостей и отправки их на указанный адрес электронной почты.
+    Содержит методы для создания отчетов на основе данных новостей
+    и отправки их на указанный адрес электронной почты.
     """
 
     formatter = NewsFormatter()
@@ -26,12 +27,13 @@ class ReportRepository:
     email_sender = EmailSender()
 
     @classmethod
-    async def generate_report_and_send_to_email(cls, email: EmailSchema) -> None:
+    async def create_report_and_send_to_email(cls, email: EmailSchema) -> None:
         """
         Генерирует отчет и отправляет его на указанный email.
 
         Args:
-            email (EmailSchema): Email пользователя, для отправки отчета по электронной почте.
+            email (EmailSchema): Email пользователя,
+            для отправки отчета по электронной почте.
         """
         await cls.generate_report()
         await cls.send_report_by_email(email.email)
@@ -39,7 +41,8 @@ class ReportRepository:
     @classmethod
     async def generate_report(cls) -> None:
         """
-        Генерирует отчет на основе данных из базы данных и сохраняет его в файл.
+        Генерирует отчет на основе данных из базы данных
+        и сохраняет его в файл.
         """
         try:
             async with session_factory() as session:
@@ -49,9 +52,8 @@ class ReportRepository:
                     logger.warning("Нет данных для формирования отчета.")
                     return None
 
-                # Генерация и сохранение отчета
-                report_path = await cls.report_generator.create_report(news_data)
-                logger.info("Отчет сформирован и сохранен в %s", report_path)
+                rep_path = await cls.report_generator.create_report(news_data)
+                logger.info("Отчет сформирован и сохранен в %s", rep_path)
 
         except Exception as e:
             logger.error("Ошибка при генерации отчета: %s", e, exc_info=True)
@@ -69,8 +71,12 @@ class ReportRepository:
             # Имитация отправки отчета на почту
             await cls.email_sender.send_report_by_email(email)
             logger.info("Отчет успешно отправлен на email: %s", email)
-        except Exception as e:
-            logger.error("Ошибка при отправке отчета на email: %s", e, exc_info=True)
+        except Exception as exc:
+            logger.error(
+                "Ошибка при отправке отчета на email: %s",
+                exc,
+                exc_info=True,
+            )
 
     @staticmethod
     async def _fetch_news_data(session: AsyncSession) -> Sequence["News"]:

@@ -28,15 +28,16 @@ class DBSettings(Settings):
         Формирует URL для подключения к базе данных Postgres.
 
         Args:
-            driver (Optional[str]): Опциональный драйвер подключения (например, 'asyncpg').
+            driver (Optional[str]): Опциональный драйвер подключения
+            (например, 'asyncpg').
 
         Returns:
             str: Строка с URL подключения к базе данных.
         """
-        return "postgresql{driver}://{user}:{password}@{host}:{port}/{name}".format(
+        return "postgresql{driver}://{user}:{pwd}@{host}:{port}/{name}".format(
             driver=f"+{driver}" if driver else "",
             user=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
+            pwd=self.POSTGRES_PASSWORD,
             host=self.DB_HOST,
             port=self.DB_PORT,
             name=self.POSTGRES_DB,

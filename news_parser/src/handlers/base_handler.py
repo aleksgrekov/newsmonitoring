@@ -12,7 +12,8 @@ async def exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     """
     Обработчик непредвиденных ошибок.
 
-    Логирует подробности ошибки и возвращает ответ с кодом состояния 500 (Internal Server Error)
+    Логирует подробности ошибки и возвращает ответ
+    с кодом состояния 500 (Internal Server Error)
     и информацией об ошибке.
 
     Args:

@@ -19,28 +19,36 @@ class NewsSchema(BaseModel):
         ...,
         title="Заголовок новости",
         description="Основной заголовок новостной статьи.",
-        example="Новые технологии в IT",
-        min_length=1,
-        max_length=255,
+        examples=[
+            "Новые технологии в IT",
+        ],
     )
     content: Optional[str] = Field(
-        default=None,
+        None,
         title="Текст новости",
         description="Основной текст новостной статьи.",
-        example="Компания X представила новую технологию...",
+        examples=[
+            "Компания X представила новую технологию...",
+        ],
     )
     pub_date: Optional[datetime] = Field(
-        default=None,
+        None,
         title="Дата публикации",
         description="Дата и время публикации новости.",
-        example="2023-10-01T12:00:00",
+        examples=[
+            "2023-10-01T12:00:00",
+        ],
     )
     url: str = Field(
         ...,
         title="URL новости",
-        description="Ссылка на новость. Должна начинаться с http:// или https://.",
-        example="https://example.com/news/new-technology",
+        description="""Ссылка на новость.
+        Должна начинаться с http:// или https://.
+        """,
         pattern=r"https?://\S+",
+        examples=[
+            "https://example.com/news/new-technology",
+        ],
     )
 
 
@@ -54,10 +62,12 @@ class NewsResponseSchema(BaseModel):
     """
 
     header: Optional[str] = Field(
-        default=None,
+        None,
         title="Заголовок ответа",
         description="Дополнительный заголовок для ответа API.",
-        example="Последние новости",
+        examples=[
+            "Последние новости",
+        ],
     )
     news: List[NewsSchema] = Field(
         ...,

@@ -21,7 +21,8 @@ class TranslatorRepository:
         """
         Переводит все новости, которые еще не были переведены.
 
-        Для каждой новости, которая еще не имеет перевода, выполняется перевод, и результат сохраняется в базе данных.
+        Для каждой новости, которая еще не имеет перевода,
+        выполняется перевод, и результат сохраняется в базе данных.
 
         """
         async with session_factory() as session:
@@ -29,11 +30,19 @@ class TranslatorRepository:
             translation_service = await cls._get_translator()
 
             translated_news = await asyncio.gather(
-                *(translation_service.translate_news(article) for article in news_list)
+                *(
+                    translation_service.translate_news(
+                        article,
+                    )
+                    for article in news_list
+                )
             )
 
             translations = [
-                Translation(**translate.model_dump()) for translate in translated_news
+                Translation(
+                    **translate.model_dump(),
+                )
+                for translate in translated_news
             ]
             session.add_all(translations)
 
@@ -50,19 +59,27 @@ class TranslatorRepository:
         return TranslationService()
 
     @classmethod
-    async def _get_untranslated_news(cls, session: AsyncSession) -> Sequence[News]:
+    async def _get_untranslated_news(
+        cls,
+        session: AsyncSession,
+    ) -> Sequence[News]:
         """
         Получает новости, которые еще не были переведены.
 
-        Выполняет запрос в базу данных, чтобы вернуть все новости, у которых еще нет перевода.
+        Выполняет запрос в базу данных,
+        чтобы вернуть все новости, у которых еще нет перевода.
 
         Args:
-            session (AsyncSession): Асинхронная сессия для работы с базой данных.
+            session (AsyncSession):
+            Асинхронная сессия для работы с базой данных.
 
         Returns:
             Sequence[News]: Список объектов News, которые еще не переведены.
         """
-        stmt = select(News).where(~exists().where(Translation.news_id == News.id))
+        select_query = select(News)
+        where_query = ~exists().where(Translation.news_id == News.id)
+        stmt = select_query.where(where_query)
+
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -71,10 +88,12 @@ class TranslatorRepository:
         """
         Безопасно выполняет коммит в базу данных.
 
-        Обрабатывает исключения, связанные с целостностью данных, и откатывает транзакцию в случае ошибок.
+        Обрабатывает исключения, связанные с целостностью данных,
+        и откатывает транзакцию в случае ошибок.
 
         Args:
-            session (AsyncSession): Асинхронная сессия для работы с базой данных.
+            session (AsyncSession):
+            Асинхронная сессия для работы с базой данных.
         """
         try:
             await session.commit()

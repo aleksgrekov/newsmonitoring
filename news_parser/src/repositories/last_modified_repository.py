@@ -16,7 +16,8 @@ class LastModifiedRepository:
 
     Методы:
         - get_header: Получает значение заголовка Last-Modified.
-        - update_header: Обновляет или создает запись с заголовком Last-Modified.
+        - update_header: Обновляет или создает запись
+        с заголовком Last-Modified.
         - _secure_commit: Безопасно выполняет commit.
     """
 
@@ -29,13 +30,18 @@ class LastModifiedRepository:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
 
         Returns:
-            Optional[str]: Значение заголовка или None, если запись отсутствует.
+            Optional[str]: Значение заголовка или None,
+            если запись отсутствует.
         """
         request = await session.execute(select(LastModified))
         response = request.scalars().one_or_none()
         return response.last_modified if response else None
 
-    async def update_header(self, session: AsyncSession, value: Optional[str]) -> None:
+    async def update_header(
+        self,
+        session: AsyncSession,
+        value: Optional[str],
+    ) -> None:
         """
         Обновляет или создает запись с заголовком Last-Modified.
 
@@ -43,10 +49,11 @@ class LastModifiedRepository:
 
         Args:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
-            value (Optional[str]): Новое значение заголовка. Если None, обновление не выполняется.
+            value (Optional[str]): Новое значение заголовка.
+            Если None, обновление не выполняется.
         """
         if value is None:
-            logger.info("Заголовок Last-Modified отсутствует, обновление не требуется.")
+            logger.info("Заголовок Last-Modified отсутствует, обновлений нет.")
             return
 
         if await self._record_exists(session):
@@ -105,7 +112,8 @@ class LastModifiedRepository:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
 
         Raises:
-            IntegrityViolationException: Если возникает ошибка целостности данных.
+            IntegrityViolationException:
+            Если возникает ошибка целостности данных.
         """
         try:
             await session.commit()

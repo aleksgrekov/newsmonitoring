@@ -52,7 +52,10 @@ class WorkerService:
             await self._bind_queue_to_exchange(queue, exchange)
 
             await queue.consume(self._processor.process_message)
-            logger.info("Начато потребление сообщений из очереди %s", self._queue_name)
+            logger.info(
+                "Начато потребление сообщений из очереди %s",
+                self._queue_name,
+            )
 
             await asyncio.Future()
 
@@ -63,7 +66,10 @@ class WorkerService:
             await self._connection.disconnect()
             logger.info("Отключение от RabbitMQ")
 
-    async def _declare_exchange(self, channel: AbstractChannel) -> AbstractExchange:
+    async def _declare_exchange(
+        self,
+        channel: AbstractChannel,
+    ) -> AbstractExchange:
         """
         Объявляет обменник в RabbitMQ.
 
@@ -103,5 +109,7 @@ class WorkerService:
         """
         await queue.bind(exchange, routing_key="")
         logger.info(
-            "Очередь %s привязана к обменнику %s", self._queue_name, self._exchange_name
+            "Очередь %s привязана к обменнику %s",
+            self._queue_name,
+            self._exchange_name,
         )

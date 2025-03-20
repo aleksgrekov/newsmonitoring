@@ -18,7 +18,7 @@ logger = configure_logging(__name__)
 class TextPreprocessor(ITextPreprocessor):
     """Класс для предварительной обработки текста."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.stop_words: Set[str] = set(stopwords.words("english"))
         self.lemmatizer: WordNetLemmatizer = WordNetLemmatizer()
 
@@ -34,17 +34,23 @@ class TextPreprocessor(ITextPreprocessor):
         """
         try:
             # Приводим текст к нижнему регистру и токенизируем
-            words: List[str] = word_tokenize(text.lower())
+            tokens: List[str] = word_tokenize(text.lower())
 
             # Убираем знаки препинания и стоп-слова
-            words: List[str] = [
-                word for word in words if word.isalnum() and word not in self.stop_words
+            filtered_words: List[str] = [
+                word
+                for word in tokens
+                if word.isalnum() and word not in self.stop_words
             ]
 
             # Лемматизируем слова
-            words: List[str] = [self.lemmatizer.lemmatize(word) for word in words]
-
-            return " ".join(words)
+            lemmatized_words: List[str] = [
+                self.lemmatizer.lemmatize(word) for word in filtered_words
+            ]
+            return " ".join(lemmatized_words)
         except Exception as exc:
-            logger.error("Ошибка при предварительной обработке текста: %s", exc)
+            logger.error(
+                "Ошибка при предварительной обработке текста: %s",
+                exc,
+            )
             raise

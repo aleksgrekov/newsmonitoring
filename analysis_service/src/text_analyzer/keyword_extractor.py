@@ -14,8 +14,9 @@ class KeywordExtractor(IKeywordExtractor):
         Инициализирует экземпляр KeywordExtractor.
 
         Args:
-            max_keywords (Optional[int]): Максимальное количество ключевых слов.
-                                          По умолчанию 10.
+            max_keywords (Optional[int]):
+            Максимальное количество ключевых слов.
+            По умолчанию 10.
         """
         self.max_keywords = max_keywords
 

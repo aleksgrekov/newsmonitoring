@@ -1,18 +1,22 @@
-from docx import Document
+from typing import TYPE_CHECKING
+
 from docx.text.paragraph import Paragraph
 from src.models.news_model import News
+
+if TYPE_CHECKING:
+    from docx.document import Document as DocumentType
 
 
 class NewsFormatter:
     """Форматирует новости для вставки в отчет."""
 
     @staticmethod
-    def add_bold_run(paragraph: "Paragraph", text: str) -> None:
+    def add_bold_run(paragraph: Paragraph, text: str) -> None:
         """Добавляет жирный текст в параграф."""
         run = paragraph.add_run(text)
         run.bold = True
 
-    def format_translation(self, news: News, doc: Document) -> None:
+    def format_translation(self, news: News, doc: DocumentType) -> None:
         """Добавляет перевод новости в документ."""
         if news.translations and news.translations[0]:
             translation = news.translations[0]
@@ -26,7 +30,7 @@ class NewsFormatter:
                 self.add_bold_run(paragraph, "Перевод: ")
                 paragraph.add_run(translation.content)
 
-    def format_analysis(self, news: News, doc: Document) -> None:
+    def format_analysis(self, news: News, doc: DocumentType) -> None:
         """Добавляет анализ новости в документ."""
         if news.analysis:
             analysis = news.analysis[0]

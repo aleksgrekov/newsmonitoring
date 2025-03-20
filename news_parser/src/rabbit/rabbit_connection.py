@@ -16,7 +16,7 @@ class RabbitConnection(IConnection):
         _channel (AbstractChannel | None): Канал для работы с RabbitMQ.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._connection: AbstractRobustConnection | None = None
         self._channel: AbstractChannel | None = None
 
@@ -33,10 +33,15 @@ class RabbitConnection(IConnection):
 
         try:
             self._connection = await connect_robust(rabbit_config.url)
-            self._channel = await self._connection.channel(publisher_confirms=False)
+            self._channel = await self._connection.channel(
+                publisher_confirms=False,
+            )
             logger.info("Подключение к RabbitMQ. - Успех.")
-        except Exception as e:
-            logger.exception("При подключении к RabbitMQ произошла ошибка: %s", e)
+        except Exception as exc:
+            logger.exception(
+                "При подключении к RabbitMQ произошла ошибка: %s",
+                exc,
+            )
             await self.disconnect()
 
     async def disconnect(self) -> None:
