@@ -6,4 +6,4 @@ base_router = APIRouter(
     tags=["API"],
 )
 
-base_router.include_router(news_router)
+base_router.include_router(news_router, prefix="/news")

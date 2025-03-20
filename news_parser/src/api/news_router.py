@@ -4,7 +4,6 @@ from src.repositories.news_repository import NewsRepository
 from src.schemas.base_schemas import SuccessResponse
 
 router = APIRouter(
-    prefix="/news",
     tags=["News"],
 )
 

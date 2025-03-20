@@ -4,11 +4,9 @@ from typing import Sequence
 
 from docx import Document
 from docx.document import Document as DocumentType
-
 from src.docx_reports.formatter import NewsFormatter
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
-
 
 logger = configure_logging(__name__)
 

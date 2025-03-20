@@ -28,6 +28,8 @@ app = FastAPI(
     description="Сервис парсинга новостей с сайта CNN",
     version="1.0.0",
     lifespan=lifespan,
+    openapi_url="/news/openapi.json",
+    docs_url="/news/docs",
 )
 
 app.include_router(base_router)

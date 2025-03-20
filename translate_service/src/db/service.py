@@ -26,3 +26,4 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
     async with session_factory() as session:
         yield session
+    await session.close()

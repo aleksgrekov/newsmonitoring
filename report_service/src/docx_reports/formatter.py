@@ -1,6 +1,5 @@
-from docx.text.paragraph import Paragraph
 from docx.document import Document as DocumentType
-
+from docx.text.paragraph import Paragraph
 from src.models.news_model import News
 
 
