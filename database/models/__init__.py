@@ -6,8 +6,8 @@ __all__ = (
     "Base",
 )
 
-from models.base_model import Base
-from models.last_modified_model import LastModified
-from models.news_analysis_model import NewsAnalysis
-from models.news_model import News
-from models.translations_model import Translation
+from src.models.base_model import Base
+from src.models.last_modified_model import LastModified
+from src.models.news_analysis_model import NewsAnalysis
+from src.models.news_model import News
+from src.models.translations_model import Translation

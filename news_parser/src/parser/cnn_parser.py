@@ -5,7 +5,6 @@ import aiohttp
 from aiohttp import ClientSession
 from pydantic import ValidationError, parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
 from src.parser.interfaces import (
@@ -57,7 +56,7 @@ class CNNParser(INewsParser):
             async with aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(300)
             ) as client:
-                logger.info(f"Парсинг страницы: {self.__url} - Начало задачи...")
+                logger.info("Парсинг страницы: %s - Начало задачи...", self.__url)
 
                 modified_header = await self.__get_modified_header(client)
 
@@ -65,19 +64,21 @@ class CNNParser(INewsParser):
                     client, modified_header
                 )
                 if html_content is None:
-                    logger.info(f"Парсинг страницы: {self.__url} - Нет новых данных.")
+                    logger.info("Парсинг страницы: %s - Нет новых данных.", self.__url)
                     return NewsResponseSchema(header=modified_header, news=[])
 
                 news_list = await self.__article_parser.parse_page(client, html_content)
                 validated_news = self.__validate_news(news_list)
 
-                logger.info(f"Парсинг страницы: {self.__url} - Успешно завершено!")
+                logger.info("Парсинг страницы: %s - Успешно завершено!", self.__url)
 
                 await self.__update_last_modified(modified_header)
                 return NewsResponseSchema(header=modified_header, news=validated_news)
 
-        except Exception as e:
-            logger.error(f"Ошибка при сборе новостей: {e}\n{traceback.format_exc()}")
+        except Exception as exc:
+            logger.error(
+                "Ошибка при сборе новостей: %s\n%s", exc, traceback.format_exc()
+            )
             return NewsResponseSchema(header=None, news=[])
 
     async def __get_modified_header(self, client: ClientSession) -> Optional[str]:
@@ -111,8 +112,10 @@ class CNNParser(INewsParser):
         validated_news = []
         try:
             validated_news = parse_obj_as(List[NewsSchema], news_list)
-        except ValidationError as e:
-            logger.error(f"Ошибка валидации новостей: {e}\n{traceback.format_exc()}")
+        except ValidationError as exc:
+            logger.error(
+                "Ошибка валидации новостей: %s\n%s}", exc, traceback.format_exc()
+            )
         return validated_news
 
     async def __update_last_modified(self, modified_header: Optional[str]):

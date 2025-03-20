@@ -2,7 +2,6 @@ import asyncio
 
 from aio_pika import ExchangeType
 from aio_pika.abc import AbstractChannel, AbstractExchange, AbstractQueue
-
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection, IMessageProcessor
 
@@ -53,12 +52,12 @@ class WorkerService:
             await self._bind_queue_to_exchange(queue, exchange)
 
             await queue.consume(self._processor.process_message)
-            logger.info(f"Начато потребление сообщений из очереди {self._queue_name}")
+            logger.info("Начато потребление сообщений из очереди %s", self._queue_name)
 
             await asyncio.Future()
 
-        except Exception as e:
-            logger.error(f"Ошибка в воркер-сервисе: {e}", exc_info=True)
+        except Exception as exc:
+            logger.error("Ошибка в воркер-сервисе: %s", exc, exc_info=True)
         finally:
             logger.info("Остановка воркер-сервиса")
             await self._connection.disconnect()
@@ -77,7 +76,7 @@ class WorkerService:
         exchange = await channel.declare_exchange(
             self._exchange_name, ExchangeType.FANOUT, durable=True
         )
-        logger.info(f"Обменник {self._exchange_name} успешно объявлен")
+        logger.info("Обменник %s успешно объявлен", self._exchange_name)
         return exchange
 
     async def _declare_queue(self, channel: AbstractChannel) -> AbstractQueue:
@@ -91,7 +90,7 @@ class WorkerService:
             Объявленная очередь.
         """
         queue = await channel.declare_queue(self._queue_name, durable=True)
-        logger.info(f"Очередь {self._queue_name} успешно объявлена")
+        logger.info("Очередь %s успешно объявлена", self._queue_name)
         return queue
 
     async def _bind_queue_to_exchange(self, queue, exchange) -> None:
@@ -104,5 +103,5 @@ class WorkerService:
         """
         await queue.bind(exchange, routing_key="")
         logger.info(
-            f"Очередь {self._queue_name} привязана к обменнику {self._exchange_name}"
+            "Очередь %s привязана к обменнику %s", self._queue_name, self._exchange_name
         )

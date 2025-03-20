@@ -1,12 +1,9 @@
 import json
 
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
-
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IMessageProcessor
-from src.repositories.translator_repository import (
-    TranslatorRepository,
-)
+from src.repositories.translator_repository import TranslatorRepository
 
 logger = configure_logging(__name__)
 
@@ -33,14 +30,11 @@ class MessageProcessor(IMessageProcessor):
         try:
             body = message.body.decode()
             data = json.loads(body)
-            logger.info(
-                f"Получено сообщение: {data['message']} из очереди {message.routing_key}"
-            )
+            logger.info("Получено сообщение: %s", data["message"])
 
             await TranslatorRepository.translate()
             await message.ack()
-            logger.info(f"Анализ новостей окончен! - Translate Service")
+            logger.info("Анализ новостей окончен! - Translate Service")
 
-        except Exception as e:
-            logger.error(f"Ошибка при обработке сообщения: {e}")
-            # await message.nack()  # Отправляем сообщение обратно в очередь
+        except Exception as exc:
+            logger.error("Ошибка при обработке сообщения: %s", exc)

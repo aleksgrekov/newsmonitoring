@@ -39,6 +39,5 @@ def run_service() -> None:
         logger.exception("Критическая ошибка в работе сервиса: %s", exc)
 
 
-# Запуск основного процесса
 if __name__ == "__main__":
     run_service()

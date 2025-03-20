@@ -1,9 +1,9 @@
-import asyncio
-
 from googletrans import Translator
-
+from src.logger.logger_config import configure_logging
 from src.models.news_model import News
 from src.schemas.translation_schemas import TranslatedNewsSchema
+
+logger = configure_logging(__name__)
 
 
 class TranslationService:
@@ -42,6 +42,6 @@ class TranslationService:
                 content=translated_content.text,
             )
 
-        except Exception as e:
-            print(f"Ошибка при переводе новости с ID {news.id}: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при переводе новости с ID %s: %s", news.id, exc)
             return None

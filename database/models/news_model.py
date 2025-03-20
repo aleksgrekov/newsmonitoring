@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from models.base_model import Base
+from src.models.base_model import Base
 from sqlalchemy import String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

@@ -3,10 +3,9 @@ from typing import Optional
 from sqlalchemy import exists, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.handlers.custom_exceptions import IntegrityViolationException
-from src.models.last_modified_model import LastModified
 from src.logger.logger_config import configure_logging
+from src.models.last_modified_model import LastModified
 
 logger = configure_logging(__name__)
 
@@ -54,10 +53,10 @@ class LastModifiedRepository:
             await self._update_record(session, value)
             logger.info("Заголовок Last-Modified обновлен.")
         else:
-            await LastModifiedRepository._create_record(session, value)
+            await self._create_record(session, value)
             logger.info("Заголовок Last-Modified добавлен в базу данных.")
 
-        await LastModifiedRepository._secure_commit(session)
+        await self._secure_commit(session)
 
     @staticmethod
     async def _record_exists(session: AsyncSession) -> bool:

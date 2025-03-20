@@ -4,7 +4,6 @@ from typing import Sequence
 from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.db.service import session_factory
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
@@ -38,7 +37,6 @@ class TranslatorRepository:
             ]
             session.add_all(translations)
 
-            # Выполняем коммит в базу данных
             await cls._secure_commit(session)
 
     @staticmethod

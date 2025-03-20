@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.parser.article_parser import ArticleParser
 from src.parser.cnn_parser import CNNParser
 from src.parser.http_requester import HttpRequester

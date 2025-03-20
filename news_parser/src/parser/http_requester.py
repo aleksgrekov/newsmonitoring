@@ -2,7 +2,6 @@ from typing import Any, Dict, Optional, Union
 
 from aiohttp import ClientSession, ClientTimeout
 from fake_useragent import UserAgent
-
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
 from src.parser.interfaces import IHttpRequester
@@ -50,13 +49,13 @@ class HttpRequester(IHttpRequester):
             Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
         if not modified_header:
-            logger.error("Не передан модификатор заголовка или контент не изменился!")
+            logger.error("Значение заголовка 'x-last-modified': %s", modified_header)
             return None
 
         try:
             return await self.__fetch_content(client)
-        except Exception as e:
-            logger.error(f"Ошибка при отправке запроса: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при отправке запроса: %s", exc)
             return None
 
     async def __fetch_content(self, client: ClientSession) -> Optional[bytes]:
@@ -76,7 +75,7 @@ class HttpRequester(IHttpRequester):
                 return await response.read()
             else:
                 logger.error(
-                    f"Ошибка при запросе к {self.__url}: Статус {response.status}"
+                    "Ошибка при запросе к %s.\nСтатус %s", self.__url, response.status
                 )
                 return None
 
@@ -96,7 +95,9 @@ class HttpRequester(IHttpRequester):
         async with client.head(self.__url, timeout=ClientTimeout(15)) as response:
             if response.status != 200:
                 logger.error(
-                    f"Не удалось получить заголовки для {self.__url}. Статус: {response.status}"
+                    "Не удалось получить заголовки для %s.\nСтатус: %s",
+                    self.__url,
+                    response.status,
                 )
                 return None
 
@@ -105,7 +106,7 @@ class HttpRequester(IHttpRequester):
                 logger.warning("Заголовок 'x-last-modified' отсутствует.")
                 return None
 
-            logger.info(f"Last-Modified: {last_modified_header}")
+            logger.info("Last-Modified: %s", last_modified_header)
 
             if last_modified_header == last_modified:
                 logger.info("Контент не изменился. В БД актуальные данные.")

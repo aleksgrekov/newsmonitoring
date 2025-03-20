@@ -3,8 +3,6 @@ from typing import Sequence
 from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-
 from src.db.service import session_factory
 from src.logger.logger_config import configure_logging
 from src.models.news_analysis_model import NewsAnalysis

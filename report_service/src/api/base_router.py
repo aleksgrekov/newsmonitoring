@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from src.api.report_router import router as report_router
 
 base_router = APIRouter(

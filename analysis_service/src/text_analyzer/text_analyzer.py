@@ -58,6 +58,6 @@ class TextAnalyzer:
             )
 
             return sentiment, keywords
-        except Exception as e:
-            logger.error(f"Ошибка при анализе текста: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при анализе текста: %s", exc)
             raise

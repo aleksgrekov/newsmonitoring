@@ -1,6 +1,5 @@
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractChannel, AbstractConnection
-
 from src.configs.rabbit_config import rabbit_config
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection

@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-
 from src.api.base_router import base_router
 from src.handlers.base_handler import exception_handler
 from src.logger.logger_config import configure_logging

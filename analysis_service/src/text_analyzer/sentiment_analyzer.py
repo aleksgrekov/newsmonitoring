@@ -1,7 +1,6 @@
-from textblob import TextBlob
-
 from src.logger.logger_config import configure_logging
 from src.text_analyzer.interfaces import ISentimentAnalyzer
+from textblob import TextBlob
 
 logger = configure_logging(__name__)
 
@@ -22,6 +21,6 @@ class SentimentAnalyzer(ISentimentAnalyzer):
         try:
             blob: TextBlob = TextBlob(text)
             return blob.sentiment.polarity
-        except Exception as e:
-            logger.error(f"Ошибка при анализе тональности текста: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при анализе тональности текста:\n%s", exc)
             raise

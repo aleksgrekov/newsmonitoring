@@ -2,10 +2,9 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# from database import News
 from src.handlers.custom_exceptions import IntegrityViolationException
 from src.logger.logger_config import configure_logging
+from src.models.news_model import News
 from src.parser.parser_factory import ParserFactory
 from src.rabbit.publisher import publisher
 from src.schemas.base_schemas import SuccessResponse
@@ -46,7 +45,7 @@ class NewsRepository:
         added_news_count = end_count - start_count
 
         await cls._secure_commit(session)
-        logger.info(f"В базу добавлено {added_news_count} новостей!")
+        logger.info("В базу добавлено %s новостей!", added_news_count)
         message = SuccessResponse(message=news_data.header)
         await publisher.send_messages(message.model_dump_json())
 

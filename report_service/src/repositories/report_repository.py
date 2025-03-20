@@ -1,15 +1,15 @@
-from typing import Optional, Sequence
+from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from src.db.service import session_factory
+from src.docx_reports.email_sender import EmailSender
 from src.docx_reports.formatter import NewsFormatter
 from src.docx_reports.generator import ReportGenerator
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
-from src.schemas.report_schemas import ReportRequestBodySchema
+from src.schemas.report_schemas import EmailSchema
 
 logger = configure_logging(__name__)
 
@@ -23,32 +23,23 @@ class ReportRepository:
 
     formatter = NewsFormatter()
     report_generator = ReportGenerator(formatter)
+    email_sender = EmailSender()
 
     @classmethod
-    async def generate_report_and_send_to_email(
-        cls, request_body: ReportRequestBodySchema
-    ) -> None:
+    async def generate_report_and_send_to_email(cls, email: EmailSchema) -> None:
         """
         Генерирует отчет и отправляет его на указанный email.
 
         Args:
-            request_body (ReportRequestBodySchema): Данные для генерации отчета и отправки на email.
+            email (EmailSchema): Email пользователя, для отправки отчета по электронной почте.
         """
-        await cls.generate_report(request_body.filename, request_body.output_dir)
-        await cls.send_report_by_email(request_body.email)
+        await cls.generate_report()
+        await cls.send_report_by_email(email.email)
 
     @classmethod
-    async def generate_report(
-        cls,
-        filename: str = "news_report.docx",
-        output_dir: Optional[str] = None,
-    ) -> None:
+    async def generate_report(cls) -> None:
         """
         Генерирует отчет на основе данных из базы данных и сохраняет его в файл.
-
-        Args:
-            filename (str): Имя файла для сохранения отчета. По умолчанию "news_report.docx".
-            output_dir (Optional[str]): Директория для сохранения отчета. Если не указана, используется папка 'reports'.
         """
         try:
             async with session_factory() as session:
@@ -59,9 +50,7 @@ class ReportRepository:
                     return None
 
                 # Генерация и сохранение отчета
-                report_path = await cls.report_generator.create_report(
-                    news_data, filename, output_dir
-                )
+                report_path = await cls.report_generator.create_report(news_data)
                 logger.info("Отчет сформирован и сохранен в %s", report_path)
 
         except Exception as e:
@@ -69,10 +58,7 @@ class ReportRepository:
             return None
 
     @classmethod
-    async def send_report_by_email(
-        cls,
-        email: str,
-    ) -> None:
+    async def send_report_by_email(cls, email: str) -> None:
         """
         Отправляет сгенерированный отчет на указанный email.
 
@@ -81,7 +67,7 @@ class ReportRepository:
         """
         try:
             # Имитация отправки отчета на почту
-            await cls.report_generator.send_report_by_email(email)
+            await cls.email_sender.send_report_by_email(email)
             logger.info("Отчет успешно отправлен на email: %s", email)
         except Exception as e:
             logger.error("Ошибка при отправке отчета на email: %s", e, exc_info=True)

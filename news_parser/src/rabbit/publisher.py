@@ -1,6 +1,5 @@
 from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel
-
 from src.configs.rabbit_config import rabbit_config
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection, IMessageSender
@@ -61,7 +60,7 @@ class Publisher(IMessageSender):
             self._exchange = await channel.declare_exchange(
                 self._exchange_name, ExchangeType.FANOUT, durable=True
             )
-            logger.info(f"Обменник {self._exchange_name} был создан.")
+            logger.info("Обменник %s был создан.", self._exchange_name)
 
     async def send_messages(
         self,
@@ -83,7 +82,7 @@ class Publisher(IMessageSender):
                 return
 
             await self._exchange.publish(Message(body=message.encode()), routing_key="")
-            logger.info(f"Отправлено сообщение в Exchange: {self._exchange_name}")
+            logger.info("Отправлено сообщение в Exchange: %s", self._exchange_name)
 
         except Exception as e:
             logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)

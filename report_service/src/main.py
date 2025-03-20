@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-
-from src.logger.logger_config import configure_logging
 from src.api.base_router import base_router
+from src.logger.logger_config import configure_logging
 
 logger = configure_logging(__name__)
 

@@ -1,10 +1,16 @@
 from typing import List, Set
 
+import nltk
 from nltk import WordNetLemmatizer, word_tokenize
 from nltk.corpus import stopwords
-
 from src.logger.logger_config import configure_logging
 from src.text_analyzer.interfaces import ITextPreprocessor
+
+# Загружаем стоп-слова и лемматизатор
+nltk.download("punkt")
+nltk.download("punkt_tab")
+nltk.download("stopwords")
+nltk.download("wordnet")
 
 logger = configure_logging(__name__)
 
@@ -38,8 +44,7 @@ class TextPreprocessor(ITextPreprocessor):
             # Лемматизируем слова
             words: List[str] = [self.lemmatizer.lemmatize(word) for word in words]
 
-            # Возвращаем текст, объединенный в строку
             return " ".join(words)
-        except Exception as e:
-            logger.error(f"Ошибка при предварительной обработке текста: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при предварительной обработке текста: %s", exc)
             raise

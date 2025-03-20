@@ -6,7 +6,6 @@ from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
 from fake_useragent import UserAgent
-
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
 from src.parser.interfaces import IArticleParser
@@ -37,8 +36,8 @@ class ArticleParser(IArticleParser):
             containers = self.__extract_containers(html_content)
             results = await self.__parse_containers(containers, client)
             return self.__filter_valid_results(results)
-        except Exception as e:
-            logger.error(f"Ошибка при парсинге страницы: {e}")
+        except Exception as exc:
+            logger.error("Ошибка при парсинге страницы: %s", exc)
             return []
 
     @staticmethod
@@ -68,12 +67,7 @@ class ArticleParser(IArticleParser):
         Returns:
             List[Dict[str, str]]: Список словарей с результатами парсинга.
         """
-        # tasks = []
-        # for index, container in enumerate(containers):
-        #     if container:
-        #         tasks.append(self.__parse_cnn_container(container, client))
-        #     if index == 10:  # Ограничение на количество парсинга для тестирования
-        #         break
+
         tasks = (
             self.__parse_cnn_container(container, client)
             for container in containers
@@ -119,12 +113,12 @@ class ArticleParser(IArticleParser):
             link_tag = container.find("a", href=True)
             link = link_tag["href"] if link_tag else "#"
             if not link.startswith("http"):
-                link = f"https://www.cnn.com{link}"
+                link = "https://www.cnn.com{link}".format(link=link)
 
             article_data = await self.__parse_article_page(client, link)
             return {"title": title, "url": link, **article_data}
-        except Exception as e:
-            logger.error(f"Ошибка при парсинге контейнера:\n{e}")
+        except Exception as exc:
+            logger.error("Ошибка при парсинге контейнера:\n%s", exc)
             return {}
 
     async def __parse_article_page(
@@ -148,12 +142,13 @@ class ArticleParser(IArticleParser):
                 ) as response:
                     if response.status == 429:
                         logger.info(
-                            f"Получен код 429. Ожидание {wait_time} секунд перед повторным запросом..."
+                            "Получен код 429. Ожидание %s секунд перед повторным запросом...",
+                            wait_time,
                         )
                         await asyncio.sleep(wait_time)
                         wait_time = min(wait_time * 2, 60)
                         continue
-                    logger.info(f"{response.status} - {url}")
+                    logger.info("%s - %s", response.status, url)
                     html_content = await response.text()
                     soup = BeautifulSoup(html_content, "lxml")
 
@@ -169,16 +164,18 @@ class ArticleParser(IArticleParser):
                         raw_date.replace("Updated", "").replace("Published", "").strip()
                     )
 
-                    pub_date = None
-                    if raw_date:
-                        try:
-                            pub_date = date_parser.parse(raw_date, ignoretz=True)
-                        except ValueError as e:
-                            logger.error(f"Ошибка при парсинге даты: {e}")
+                    try:
+                        pub_date = (
+                            date_parser.parse(raw_date, ignoretz=True)
+                            if raw_date
+                            else None
+                        )
+                    except ValueError as exc:
+                        logger.error("Ошибка при парсинге даты: %s", exc)
 
                     return {"content": full_text, "pub_date": pub_date}
-            except ClientResponseError as e:
-                logger.error(f"Ошибка при парсинге страницы новости {url}: {e}")
+            except ClientResponseError as exc:
+                logger.error("Ошибка при парсинге страницы новости %s\n%s", url, exc)
                 return {"content": "", "pub_date": None}
 
     @property
