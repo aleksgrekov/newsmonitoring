@@ -1,3 +1,5 @@
+from typing import Any, Dict, Mapping
+
 from aio_pika import ExchangeType, Message
 from aio_pika.abc import AbstractChannel, AbstractExchange
 from src.configs.rabbit_config import rabbit_config
@@ -27,7 +29,7 @@ class Publisher(IMessageSender):
         self,
         conn: IConnection,
         exchange_name: str = rabbit_config.FANOUT_EXCHANGE,
-    ):
+    ) -> None:
         """
         Инициализация Publisher с созданием канала и обменника.
 
@@ -39,6 +41,45 @@ class Publisher(IMessageSender):
         self._channel: AbstractChannel | None = None
         self._exchange: AbstractExchange | None = None
         self._exchange_name = exchange_name
+
+    async def send_messages(
+        self,
+        message: str,
+    ) -> None:
+        """
+        Отправляет сообщение в указанный обменник (exchange).
+
+        Args:
+            message (str): Сообщение для отправки.
+
+        Raises:
+            Exception: Если произошла ошибка при отправке сообщения.
+        """
+        try:
+            await self._ensure_exchange()
+            if not self._exchange:
+                logger.error(
+                    "Невозможно отправить сообщение. %s",
+                    "Обменник отсутствует.",
+                )
+                return
+
+            headers: Dict[str, Any] = {
+                rabbit_config.X_RETRIES_HEADER: rabbit_config.ATTEMPTS_COUNT,
+            }
+            msg = Message(
+                body=message.encode(),
+                headers=headers,
+            )
+            await self._exchange.publish(msg, routing_key="")
+
+            logger.info(
+                "Отправлено сообщение в Exchange: %s",
+                self._exchange_name,
+            )
+
+        except Exception as e:
+            logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)
 
     async def _ensure_channel(self) -> AbstractChannel:
         """
@@ -68,41 +109,6 @@ class Publisher(IMessageSender):
                 self._exchange_name, ExchangeType.FANOUT, durable=True
             )
             logger.info("Обменник %s был создан.", self._exchange_name)
-
-    async def send_messages(
-        self,
-        message: str,
-    ) -> None:
-        """
-        Отправляет сообщение в указанный обменник (exchange).
-
-        Args:
-            message (str): Сообщение для отправки.
-
-        Raises:
-            Exception: Если произошла ошибка при отправке сообщения.
-        """
-        try:
-            await self._ensure_exchange()
-            if not self._exchange:
-                logger.error(
-                    "Невозможно отправить сообщение. %s",
-                    "Обменник отсутствует.",
-                )
-                return
-
-            await self._exchange.publish(
-                Message(body=message.encode()),
-                routing_key="",
-            )
-
-            logger.info(
-                "Отправлено сообщение в Exchange: %s",
-                self._exchange_name,
-            )
-
-        except Exception as e:
-            logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)
 
 
 publisher: IMessageSender = Publisher(connection)

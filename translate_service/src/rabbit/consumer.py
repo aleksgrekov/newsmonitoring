@@ -25,11 +25,12 @@ class WorkerService:
         processor: IMessageProcessor,
         exchange_name: str,
         queue_name: str,
-    ):
+    ) -> None:
         self._connection = connection
         self._processor = processor
         self._exchange_name = exchange_name
         self._queue_name = queue_name
+        self.stop_event = asyncio.Event()
 
     async def run(self) -> None:
         """
@@ -57,7 +58,7 @@ class WorkerService:
                 self._queue_name,
             )
 
-            await asyncio.Future()
+            await self.stop_event.wait()
 
         except Exception as exc:
             logger.error("Ошибка в воркер-сервисе: %s", exc, exc_info=True)
@@ -65,6 +66,11 @@ class WorkerService:
             logger.info("Остановка воркер-сервиса")
             await self._connection.disconnect()
             logger.info("Отключение от RabbitMQ")
+
+    def shutdown(self):
+        """Обработчик завершения работы по сигналу"""
+        logger.info("Получен сигнал завершения, останавливаем сервис")
+        self.stop_event.set()
 
     async def _declare_exchange(
         self,

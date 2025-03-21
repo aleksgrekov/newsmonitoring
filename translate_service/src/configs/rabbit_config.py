@@ -13,6 +13,13 @@ class RabbitConfig(Settings):
         RABBITMQ_LOCAL_HOST_NAME (str): Хост RabbitMQ.
         RABBITMQ_LOCAL_PORT (int): Порт RabbitMQ.
 
+        X_RETRIES_HEADER (str): хедер для отправки количества
+        попыток обработки сообщения
+
+        ATTEMPTS_COUNT (int): количество попыток отправки сообщения
+        CRITICAL_ATTEMPTS_VALUE (int): критическое значение, при котором
+        сообщение будет отменено (по умолчанию равно 0).
+
         TRANSLATE_QUEUE (str): Название очереди сообщений.
         FANOUT_EXCHANGE (str): Название fanout exchange.
     """
@@ -21,6 +28,10 @@ class RabbitConfig(Settings):
     RABBITMQ_DEFAULT_PASS: str
     RABBITMQ_LOCAL_HOST_NAME: str
     RABBITMQ_LOCAL_PORT: int
+
+    X_RETRIES_HEADER: str
+    ATTEMPTS_COUNT: int
+    CRITICAL_ATTEMPTS_VALUE: int
 
     TRANSLATE_QUEUE: str
     FANOUT_EXCHANGE: str

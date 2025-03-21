@@ -41,9 +41,7 @@ class ReportGenerator:
 
         doc = self._generate_report(news_data)
 
-        await asyncio.to_thread(
-            doc.save, path_for_save
-        )
+        await asyncio.to_thread(doc.save, path_for_save)
 
         return str(path_for_save)
 
@@ -60,9 +58,7 @@ class ReportGenerator:
     def _create_document() -> DocumentType:
         """Создает новый документ с заголовком отчета."""
         doc = Document()
-        doc.add_heading(
-            "Отчет по новостям", level=1
-        )
+        doc.add_heading("Отчет по новостям", level=1)
         return doc
 
     def _add_news_to_document(self, doc: DocumentType, news: News) -> None:
@@ -82,9 +78,7 @@ class ReportGenerator:
         self.formatter.format_translation(news, doc)
 
         if news.content:
-            doc.add_paragraph(
-                str(news.content)
-            )
+            doc.add_paragraph(str(news.content))
 
         self.formatter.format_analysis(news, doc)
         doc.add_paragraph("—" * 50)
