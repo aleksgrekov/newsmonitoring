@@ -9,7 +9,6 @@
 logs/
 *.log
 *.log.*
-*.docx
 
 # Кэш и временные файлы Python
 __pycache__/
@@ -22,14 +21,3 @@ __pycache__/
 .vscode/
 *.swp
 *.swo
-
-# Базы данных
-/database/postgres_data/
-
-# Виртуальное окружение для разработки
-poetry.lock
-pyproject.toml
-
-# Отчеты по новостям
-/reports/
-

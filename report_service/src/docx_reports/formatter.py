@@ -23,7 +23,6 @@ class NewsFormatter:
 
             if translation.content:
                 paragraph = doc.add_paragraph()
-                # self.add_bold_run(paragraph, "Перевод: ")
                 paragraph.add_run(translation.content)
 
     def format_analysis(self, news: News, doc: DocumentType) -> None:

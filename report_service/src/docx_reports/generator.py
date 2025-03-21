@@ -43,7 +43,7 @@ class ReportGenerator:
 
         await asyncio.to_thread(
             doc.save, path_for_save
-        )  # Метод save теперь распознается
+        )
 
         return str(path_for_save)
 
@@ -62,7 +62,7 @@ class ReportGenerator:
         doc = Document()
         doc.add_heading(
             "Отчет по новостям", level=1
-        )  # Метод add_heading теперь распознается
+        )
         return doc
 
     def _add_news_to_document(self, doc: DocumentType, news: News) -> None:
@@ -84,7 +84,7 @@ class ReportGenerator:
         if news.content:
             doc.add_paragraph(
                 str(news.content)
-            )  # Метод add_paragraph теперь распознается
+            )
 
         self.formatter.format_analysis(news, doc)
-        doc.add_paragraph("—" * 50)  # Метод add_paragraph теперь распознается
+        doc.add_paragraph("—" * 50)

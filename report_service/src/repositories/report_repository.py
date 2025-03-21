@@ -70,7 +70,6 @@ class ReportRepository:
             email (str): Адрес электронной почты для отправки отчета.
         """
         try:
-            # Имитация отправки отчета на почту
             await cls.email_sender.send_report_by_email(email)
             logger.info("Отчет успешно отправлен на email: %s", email)
         except Exception as exc:
