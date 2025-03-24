@@ -85,7 +85,11 @@ class HttpRequester(IHttpRequester):
             logger.error("Ошибка ответа сервера: %s", exc)
             return None
         except aiohttp.ServerTimeoutError as exc:
-            logger.error("Таймаут сервера при запросе к %s: %s", self.__url, exc)
+            logger.error(
+                "Таймаут сервера при запросе к %s: %s",
+                self.__url,
+                exc,
+            )
             return None
         except aiohttp.ClientConnectionError as exc:
             logger.error("Ошибка подключения к серверу: %s", exc)

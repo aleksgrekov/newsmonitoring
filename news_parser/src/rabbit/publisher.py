@@ -79,7 +79,10 @@ class Publisher(IMessageSender):
                 self._exchange_name,
             )
         except aio_pika_exceptions.PublishError as exc:
-            logger.exception("Ошибка при публикации сообщения в RabbitMQ: %s", exc)
+            logger.exception(
+                "Ошибка при публикации сообщения в RabbitMQ: %s",
+                exc,
+            )
         except aio_pika_exceptions.AMQPChannelError as exc:
             logger.exception("Ошибка канала RabbitMQ при публикации: %s", exc)
 
