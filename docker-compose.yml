@@ -10,7 +10,7 @@ services:
       - ./database/migrations:/app/migrations
       - ./database/alembic.ini:/app/alembic.ini
       - ./database/models:/app/src/models
-    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
+    command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
     networks:
       - app_network
     depends_on:
@@ -58,7 +58,7 @@ services:
       - .env:/app/.env
       - ./database/models:/app/src/models
       - ./reports:/app/reports
-    command: bash -c "uvicorn src.main:app --host 0.0.0.0 --port 8080"
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8080"
     networks:
       - app_network
     depends_on:
