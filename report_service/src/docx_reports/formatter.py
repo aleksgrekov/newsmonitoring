@@ -22,6 +22,8 @@ class NewsFormatter:
                 paragraph.add_run(translation.title)
 
             if translation.content:
+                print(translation.content)
+
                 paragraph = doc.add_paragraph()
                 paragraph.add_run(translation.content)
 

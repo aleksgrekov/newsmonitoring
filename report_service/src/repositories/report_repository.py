@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.db.service import session_factory
@@ -83,7 +84,8 @@ class ReportRepository:
     @staticmethod
     async def _fetch_news_data(session: AsyncSession) -> Sequence["News"]:
         """
-        Получает данные новостей из базы данных.
+        Получает данные новостей из базы данных за сегодняшний день,
+        отсортированные по убыванию даты публикации.
 
         Args:
             session (AsyncSession): Асинхронная сессия SQLAlchemy.
@@ -91,8 +93,18 @@ class ReportRepository:
         Returns:
             Sequence[News]: Список объектов новостей.
         """
-        stmt = select(News).options(
-            selectinload(News.translations), selectinload(News.analysis)
+
+        today = datetime.now().date()
+
+        stmt = (
+            select(News)
+            .options(
+                selectinload(News.translations),
+                selectinload(News.analysis),
+            )
+            .filter(News.pub_date >= today)
+            .order_by(desc(News.pub_date))
         )
+
         request = await session.execute(stmt)
         return request.scalars().all()

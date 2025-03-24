@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
@@ -27,20 +28,18 @@ class ReportGenerator:
         Returns:
             Путь к сохраненному файлу.
         """
-        report_folder = (
-            Path(
-                __file__,
-            )
-            .resolve()
-            .parent.parent.parent
-            / "reports"
-        )
+        # Формируем название файла: "YYYY-MM-DD_news.docx"
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        report_filename = f"{today_date}_news.docx"
+
+        report_folder = Path(__file__).resolve().parent.parent.parent / "reports"
         report_folder.mkdir(parents=True, exist_ok=True)
 
-        path_for_save = str(report_folder / "news_report.docx")
+        # Полный путь к файлу
+        path_for_save = str(report_folder / report_filename)
 
+        # Генерируем отчет
         doc = self._generate_report(news_data)
-
         await asyncio.to_thread(doc.save, path_for_save)
 
         return str(path_for_save)
@@ -64,7 +63,13 @@ class ReportGenerator:
     def _add_news_to_document(self, doc: DocumentType, news: News) -> None:
         """Добавляет новость в документ."""
         doc.add_heading(news.title, level=2)
-        doc.add_paragraph(news.content)
+
+        if len(news.content) < 500:
+            news_content = news.content
+        else:
+            news_content = news.content[:500] + "..."
+
+        doc.add_paragraph(news_content)
 
         doc.add_paragraph()
 
@@ -77,8 +82,5 @@ class ReportGenerator:
 
         self.formatter.format_translation(news, doc)
 
-        if news.content:
-            doc.add_paragraph(str(news.content))
-
         self.formatter.format_analysis(news, doc)
-        doc.add_paragraph("—" * 50)
+        doc.add_paragraph("—" * 39)
