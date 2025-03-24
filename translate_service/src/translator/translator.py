@@ -53,3 +53,11 @@ class TranslationService:
                 exc,
             )
             return None
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка при переводе новости с ID %s: %s",
+                news.id,
+                critical_exc,
+                exc_info=True,
+            )
+            return None

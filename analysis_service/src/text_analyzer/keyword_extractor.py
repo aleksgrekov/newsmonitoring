@@ -37,3 +37,10 @@ class KeywordExtractor(IKeywordExtractor):
         except (AttributeError, TypeError) as exc:
             logger.error("Ошибка при извлечении ключевых слов: %s", exc)
             raise
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка при извлечении ключевых слов: %s",
+                critical_exc,
+                exc_info=True,
+            )
+            raise

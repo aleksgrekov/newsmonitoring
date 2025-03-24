@@ -127,8 +127,9 @@ class MessageProcessor(IMessageProcessor):
                 retries,
             )
 
-        except Exception as exc:
+        except Exception as critical_exc:
             logger.exception(
                 "Ошибка при повторной отправке сообщения в очередь: %s",
-                exc,
+                critical_exc,
+                exc_info=True,
             )

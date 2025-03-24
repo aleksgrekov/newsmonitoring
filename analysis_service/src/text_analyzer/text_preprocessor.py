@@ -54,3 +54,10 @@ class TextPreprocessor(ITextPreprocessor):
                 exc,
             )
             raise
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка при предварительной обработке текста: %s",
+                critical_exc,
+                exc_info=True,
+            )
+            raise

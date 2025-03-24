@@ -65,6 +65,13 @@ class WorkerService:
             logger.error("Ошибка AMQP: %s", exc, exc_info=True)
         except RuntimeError as exc:
             logger.error("Ошибка выполнения: %s", exc, exc_info=True)
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка в воркер-сервисе: %s",
+                critical_exc,
+                exc_info=True,
+            )
+
         finally:
             logger.info("Остановка воркер-сервиса")
             await self._connection.disconnect()

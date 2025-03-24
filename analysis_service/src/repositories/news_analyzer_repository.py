@@ -116,3 +116,11 @@ class NewsAnalyzerRepository:
             logger.error("Ошибка целостности данных при коммите: %s", exc)
             await session.rollback()
             raise
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка целостности данных при коммите: %s",
+                critical_exc,
+                exc_info=True,
+            )
+            await session.rollback()
+            raise

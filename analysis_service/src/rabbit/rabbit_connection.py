@@ -41,6 +41,13 @@ class RabbitConnection(IConnection):
                 exc,
             )
             await self.disconnect()
+        except Exception as critical_exc:
+            logger.exception(
+                "При подключении к RabbitMQ произошла ошибка: %s",
+                critical_exc,
+                exc_info=True,
+            )
+            await self.disconnect()
 
     async def disconnect(self) -> None:
         """

@@ -64,6 +64,12 @@ class MessageProcessor(IMessageProcessor):
                 await message.reject(requeue=False)
         except aio_pika_exceptions.AMQPError as exc:
             logger.error("Ошибка AMQP: %s", exc)
+        except Exception as critical_exc:
+            logger.exception(
+                "Непредвиденная ошибка при обработке сообщения: %s",
+                critical_exc,
+                exc_info=True,
+            )
 
     def _get_retry_count(self, message: AbstractIncomingMessage) -> int:
         """
@@ -132,8 +138,9 @@ class MessageProcessor(IMessageProcessor):
                 retries,
             )
 
-        except Exception as exc:
+        except Exception as critical_exc:
             logger.exception(
                 "Ошибка при повторной отправке сообщения в очередь: %s",
-                exc,
+                critical_exc,
+                exc_info=True,
             )

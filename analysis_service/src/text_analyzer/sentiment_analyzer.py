@@ -24,3 +24,10 @@ class SentimentAnalyzer(ISentimentAnalyzer):
         except (AttributeError, TypeError) as exc:
             logger.error("Ошибка при анализе тональности текста:\n%s", exc)
             raise
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка при анализе тональности текста:\n%s",
+                critical_exc,
+                exc_info=True,
+            )
+            raise

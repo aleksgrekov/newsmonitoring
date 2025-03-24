@@ -31,8 +31,12 @@ def run_service() -> None:
     except KeyboardInterrupt:
         logger.info("Сервис был остановлен вручную!")
 
-    except Exception as exc:
-        logger.exception("Критическая ошибка в работе сервиса: %s", exc)
+    except Exception as critical_exc:
+        logger.exception(
+            "Критическая ошибка в работе сервиса: %s",
+            critical_exc,
+            exc_info=True,
+        )
 
 
 if __name__ == "__main__":

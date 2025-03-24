@@ -67,3 +67,10 @@ class TextAnalyzer:
         except (AttributeError, TypeError, ValueError) as exc:
             logger.error("Ошибка при анализе текста: %s", exc)
             raise
+        except Exception as critical_exc:
+            logger.error(
+                "Непредвиденная ошибка при анализе текста: %s",
+                critical_exc,
+                exc_info=True,
+            )
+            raise
