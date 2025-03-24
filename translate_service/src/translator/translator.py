@@ -1,12 +1,9 @@
-import logging
-
 from googletrans import Translator
 from src.logger.logger_config import configure_logging
 from src.models.news_model import News
 from src.schemas.translation_schemas import TranslatedNewsSchema
 
 logger = configure_logging(__name__)
-logging.getLogger("_client").setLevel(logging.WARNING)  # Отключить INFO-логи
 
 
 class TranslationService:
