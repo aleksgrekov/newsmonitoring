@@ -1,4 +1,5 @@
 from aio_pika import connect_robust
+from aio_pika import exceptions as aio_pika_exceptions
 from aio_pika.abc import AbstractChannel, AbstractConnection
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection
@@ -31,7 +32,10 @@ class RabbitConnection(IConnection):
                 publisher_confirms=False,
             )
             logger.info("Подключение к RabbitMQ. - Успех.")
-        except Exception as exc:
+        except (
+            aio_pika_exceptions.AMQPConnectionError,
+            aio_pika_exceptions.AMQPChannelError,
+        ) as exc:
             logger.exception(
                 "При подключении к RabbitMQ произошла ошибка: %s",
                 exc,

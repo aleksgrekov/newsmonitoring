@@ -1,6 +1,7 @@
 import asyncio
 
 from aio_pika import ExchangeType
+from aio_pika import exceptions as aio_pika_exceptions
 from aio_pika.abc import AbstractChannel, AbstractExchange, AbstractQueue
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IConnection, IMessageProcessor
@@ -60,8 +61,10 @@ class WorkerService:
 
             await self.stop_event.wait()
 
-        except Exception as exc:
-            logger.error("Ошибка в воркер-сервисе: %s", exc, exc_info=True)
+        except aio_pika_exceptions.AMQPError as exc:
+            logger.error("Ошибка AMQP: %s", exc, exc_info=True)
+        except RuntimeError as exc:
+            logger.error("Ошибка выполнения: %s", exc, exc_info=True)
         finally:
             logger.info("Остановка воркер-сервиса")
             await self._connection.disconnect()

@@ -64,6 +64,6 @@ class TextAnalyzer:
             )
 
             return sentiment, keywords
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError) as exc:
             logger.error("Ошибка при анализе текста: %s", exc)
             raise

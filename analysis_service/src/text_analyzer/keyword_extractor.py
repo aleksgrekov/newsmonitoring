@@ -34,6 +34,6 @@ class KeywordExtractor(IKeywordExtractor):
             # Извлекаем уникальные слова и сортируем их по длине
             words: List[str] = sorted(set(text.split()), key=len, reverse=True)
             return words[: self.max_keywords]
-        except Exception as exc:
+        except (AttributeError, TypeError) as exc:
             logger.error("Ошибка при извлечении ключевых слов: %s", exc)
             raise

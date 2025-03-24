@@ -1,6 +1,7 @@
-from typing import Any, Dict, Mapping
+from typing import Any, Dict
 
 from aio_pika import ExchangeType, Message
+from aio_pika import exceptions as aio_pika_exceptions
 from aio_pika.abc import AbstractChannel, AbstractExchange
 from src.configs.rabbit_config import rabbit_config
 from src.logger.logger_config import configure_logging
@@ -77,9 +78,10 @@ class Publisher(IMessageSender):
                 "Отправлено сообщение в Exchange: %s",
                 self._exchange_name,
             )
-
-        except Exception as e:
-            logger.exception("Ошибка при отправке сообщения в RabbitMQ: %s", e)
+        except aio_pika_exceptions.PublishError as exc:
+            logger.exception("Ошибка при публикации сообщения в RabbitMQ: %s", exc)
+        except aio_pika_exceptions.AMQPChannelError as exc:
+            logger.exception("Ошибка канала RabbitMQ при публикации: %s", exc)
 
     async def _ensure_channel(self) -> AbstractChannel:
         """

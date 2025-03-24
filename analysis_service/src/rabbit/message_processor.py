@@ -1,6 +1,7 @@
 import json
 
 from aio_pika import Message
+from aio_pika import exceptions as aio_pika_exceptions
 from aio_pika.abc import AbstractChannel, AbstractIncomingMessage
 from src.logger.logger_config import configure_logging
 from src.rabbit.interfaces import IMessageProcessor
@@ -46,7 +47,7 @@ class MessageProcessor(IMessageProcessor):
             await NewsAnalyzerRepository.analyze_and_save_news()
             await message.ack()
             logger.info("Анализ новостей завершен! - Analysis Service")
-        except ValueError as exc:
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             logger.exception(
                 "Ошибка при обработке сообщения: %s",
                 exc,
@@ -61,6 +62,8 @@ class MessageProcessor(IMessageProcessor):
                     "Превышен лимит попыток обработки. Сообщение отклонено.",
                 )
                 await message.reject(requeue=False)
+        except aio_pika_exceptions.AMQPError as exc:
+            logger.error("Ошибка AMQP: %s", exc)
 
     def _get_retry_count(self, message: AbstractIncomingMessage) -> int:
         """

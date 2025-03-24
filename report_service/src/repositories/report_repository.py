@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Sequence
 
 from sqlalchemy import desc, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.db.service import session_factory
@@ -57,10 +58,10 @@ class ReportRepository:
                 rep_path = await cls.report_generator.create_report(news_data)
                 logger.info("Отчет сформирован и сохранен в %s", rep_path)
 
-        except Exception as exc:
+        except SQLAlchemyError as exc:
             message = ("Ошибка при генерации отчета: %s", exc)
             logger.error(message, exc_info=True)
-            raise BaseCustomException(message)
+            raise BaseCustomException(message) from exc
 
     @classmethod
     async def send_report_by_email(cls, email: str) -> None:
@@ -70,16 +71,9 @@ class ReportRepository:
         Args:
             email (str): Адрес электронной почты для отправки отчета.
         """
-        try:
-            await cls.email_sender.send_report_by_email(email)
-            logger.info("Отчет успешно отправлен на email: %s", email)
-        except Exception as exc:
-            message = (
-                "Ошибка при отправке отчета на email: %s",
-                exc,
-            )
-            logger.error(message, exc_info=True)
-            raise BaseCustomException()
+
+        await cls.email_sender.send_report_by_email(email)
+        logger.info("Отчет успешно отправлен на email: %s", email)
 
     @staticmethod
     async def _fetch_news_data(session: AsyncSession) -> Sequence["News"]:

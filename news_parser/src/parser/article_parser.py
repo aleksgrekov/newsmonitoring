@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from bs4 import BeautifulSoup, Tag
 from dateutil import parser as date_parser
-from fake_useragent import UserAgent
+from fake_useragent import FakeUserAgentError, UserAgent
 from src.configs.parser_config import parser_settings
 from src.logger.logger_config import configure_logging
 from src.parser.interfaces import IArticleParser
@@ -33,13 +33,10 @@ class ArticleParser(IArticleParser):
             List[Dict[str, Optional[str]]]: Список словарей
             с данными о статьях.
         """
-        try:
-            containers = self.__extract_containers(html_content)
-            results = await self.__parse_containers(containers, client)
-            return self.__filter_valid_results(results)
-        except Exception as exc:
-            logger.error("Ошибка при парсинге страницы: %s", exc)
-            return []
+
+        containers = self.__extract_containers(html_content)
+        results = await self.__parse_containers(containers, client)
+        return self.__filter_valid_results(results)
 
     @staticmethod
     def __extract_containers(html_content: bytes) -> List[Tag]:
@@ -52,8 +49,12 @@ class ArticleParser(IArticleParser):
         Returns:
             List[Tag]: Список контейнеров статей.
         """
-        soup = BeautifulSoup(html_content, "lxml")
-        return soup.select("div.card.container__item")
+        try:
+            soup = BeautifulSoup(html_content, "lxml")
+            return soup.select("div.card.container__item")
+        except (AttributeError, TypeError) as exc:
+            logger.error("Ошибка при извлечении контейнеров: %s", exc)
+            return []
 
     async def __parse_containers(
         self, containers: List[Tag], client: ClientSession
@@ -69,13 +70,29 @@ class ArticleParser(IArticleParser):
             List[Dict[str, Optional[str]]]: Список словарей
             с результатами парсинга.
         """
-        tasks = (
-            self.__parse_cnn_container(container, client)
-            for container in containers
-            if container
-        )
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        return [res for res in results if isinstance(res, dict) and bool(res)]
+        try:
+            tasks = (
+                self.__parse_cnn_container(container, client)
+                for container in containers
+                if container
+            )
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            return [
+                res
+                for res in results
+                if isinstance(
+                    res,
+                    dict,
+                )
+                and bool(res)
+            ]
+        except (
+            asyncio.TimeoutError,
+            ClientResponseError,
+            AttributeError,
+        ) as exc:
+            logger.error("Ошибка при парсинге контейнеров: %s", exc)
+            return []
 
     @staticmethod
     def __filter_valid_results(
@@ -110,18 +127,19 @@ class ArticleParser(IArticleParser):
                 "span",
                 class_="container__headline-text",
             )
-            if headline_tag:
-                title = headline_tag.text.strip()
-            else:
-                title = "No title"
+            title = headline_tag.text.strip() if headline_tag else "No title"
 
             link_tag = container.find("a", href=True)
-
-            if isinstance(link_tag, Tag):
-                link = str(link_tag.get("href", "#"))
-            else:
-                link = "#"
-
+            link = (
+                str(
+                    link_tag.get(
+                        "href",
+                        "#",
+                    )
+                )
+                if isinstance(link_tag, Tag)
+                else "#"
+            )
             link = (
                 f"https://www.cnn.com{link}"
                 if link and not link.startswith("http")
@@ -130,8 +148,8 @@ class ArticleParser(IArticleParser):
 
             article_data = await self.__parse_article_page(client, link or "#")
             return {"title": title or "", "url": link or "", **article_data}
-        except Exception as exc:
-            logger.error("Ошибка при парсинге контейнера:\n%s", exc)
+        except (AttributeError, TypeError) as exc:
+            logger.error("Ошибка при парсинге контейнера: %s", exc)
             return {}
 
     async def __parse_article_page(
@@ -171,7 +189,6 @@ class ArticleParser(IArticleParser):
                         "div",
                         class_="article__content",
                     )
-
                     paragraphs = (
                         content_container.find_all("p")
                         if content_container
@@ -207,9 +224,14 @@ class ArticleParser(IArticleParser):
                         pub_date = None
 
                     return {"content": full_text, "pub_date": pub_date}
-            except ClientResponseError as exc:
+            except (
+                ClientResponseError,
+                asyncio.TimeoutError,
+                AttributeError,
+                ValueError,
+            ) as exc:
                 logger.error(
-                    "Ошибка при парсинге страницы новости %s\n%s",
+                    "Ошибка при парсинге страницы новости %s: %s",
                     url,
                     exc,
                 )
@@ -223,7 +245,11 @@ class ArticleParser(IArticleParser):
         Returns:
             str: Строка с User-Agent.
         """
-        return UserAgent().random
+        try:
+            return UserAgent().random
+        except FakeUserAgentError as exc:
+            logger.error("Ошибка при генерации User-Agent: %s", exc)
+            return "Mozilla/5.0"
 
     @property
     def __headers(self) -> Dict[str, str]:

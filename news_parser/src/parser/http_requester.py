@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
+import aiohttp
 from aiohttp import ClientSession, ClientTimeout
 from fake_useragent import UserAgent
 from src.configs.parser_config import parser_settings
@@ -55,11 +56,7 @@ class HttpRequester(IHttpRequester):
             )
             return None
 
-        try:
-            return await self.__fetch_content(client)
-        except Exception as exc:
-            logger.error("Ошибка при отправке запроса: %s", exc)
-            return None
+        return await self.__fetch_content(client)
 
     async def __fetch_content(self, client: ClientSession) -> Optional[bytes]:
         """
@@ -71,18 +68,28 @@ class HttpRequester(IHttpRequester):
         Returns:
             Optional[bytes]: Байтовый HTML-контент или None в случае ошибки.
         """
-        async with client.get(
-            self.__url, headers=self.__headers, timeout=ClientTimeout(15)
-        ) as response:
-            if response.status == 200:
-                return await response.read()
-            else:
-                logger.error(
-                    "Ошибка при запросе к %s.\nСтатус %s",
-                    self.__url,
-                    response.status,
-                )
-                return None
+        try:
+            async with client.get(
+                self.__url, headers=self.__headers, timeout=ClientTimeout(15)
+            ) as response:
+                if response.status == 200:
+                    return await response.read()
+                else:
+                    logger.error(
+                        "Ошибка при запросе к %s.\nСтатус %s",
+                        self.__url,
+                        response.status,
+                    )
+                    return None
+        except aiohttp.ClientResponseError as exc:
+            logger.error("Ошибка ответа сервера: %s", exc)
+            return None
+        except aiohttp.ServerTimeoutError as exc:
+            logger.error("Таймаут сервера при запросе к %s: %s", self.__url, exc)
+            return None
+        except aiohttp.ClientConnectionError as exc:
+            logger.error("Ошибка подключения к серверу: %s", exc)
+            return None
 
     async def fetch_and_compare(
         self, client: ClientSession, last_modified: Optional[str]

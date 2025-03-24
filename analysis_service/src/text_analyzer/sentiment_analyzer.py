@@ -21,6 +21,6 @@ class SentimentAnalyzer(ISentimentAnalyzer):
         try:
             blob: TextBlob = TextBlob(text)
             return blob.sentiment.polarity
-        except Exception as exc:
+        except (AttributeError, TypeError) as exc:
             logger.error("Ошибка при анализе тональности текста:\n%s", exc)
             raise

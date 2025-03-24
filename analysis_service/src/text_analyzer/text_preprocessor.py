@@ -48,7 +48,7 @@ class TextPreprocessor(ITextPreprocessor):
                 self.lemmatizer.lemmatize(word) for word in filtered_words
             ]
             return " ".join(lemmatized_words)
-        except Exception as exc:
+        except (AttributeError, TypeError, LookupError) as exc:
             logger.error(
                 "Ошибка при предварительной обработке текста: %s",
                 exc,

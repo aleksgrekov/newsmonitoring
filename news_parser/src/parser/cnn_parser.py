@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 from typing import Dict, List, Optional
 
@@ -99,8 +100,11 @@ class CNNParser(INewsParser):
                     header=modified_header,
                     news=validated_news,
                 )
-
-        except Exception as exc:
+        except (
+            aiohttp.ClientError,
+            asyncio.TimeoutError,
+            UnicodeDecodeError,
+        ) as exc:
             logger.error(
                 "Ошибка при сборе новостей: %s\n%s",
                 exc,
